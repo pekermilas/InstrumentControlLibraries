@@ -128,7 +128,7 @@ class sr400(object):
         self.write('CR') # (Manual p.45) Resets counters
         self.write('CS') # (Manual p.44) Starts counters
 
-	def count_reset(self):
+    def count_reset(self):
         self.write('CR') # (Manual p.45) Resets counters
 
     def count_stop(self):
@@ -139,7 +139,7 @@ class sr400(object):
 
     def gate_delay(self, channel = 'A'):
         # (Manual p.44) Reports gate delay position
-        delay = float(self.query('GZ ' + ('0' if channel == 'A' else '1'))).rstrip())
+        delay = float(self.query('GZ ' + ('0' if channel == 'A' else '1'))).rstrip()
         return delay
 
     def gate_delay_set(self, channel = 'A', delay = 0.0):
@@ -155,4 +155,46 @@ class sr400(object):
 
     def gate_mode(self, channel = 'A', mode = 'CW', read = False):
         # (Manual p.43) Select gate 'A' or 'B', defaults to 'A'
-       
+		'''
+		:param channel: DESCRIPTION, defaults to 'A'
+		:param mode: If it is changed to SCAN, the delay begins scanning from the start position on the next count period. If it is changed to FIXED, the delay returns to the start position immediately, defaults to 'CW'
+		:param query: True for asking, defaults to False for setting
+		'''
+        gate_mode_dict = {'CW':0, 'FIXED':1, 'SCAN': 2}
+        if read:
+            return self.query('GM '+ ('0' if channel == 'A' else '1')).rstrip()
+        else:
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
