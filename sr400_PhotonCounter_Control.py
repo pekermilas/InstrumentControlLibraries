@@ -128,11 +128,31 @@ class sr400(object):
         self.write('CR') # (Manual p.45) Resets counters
         self.write('CS') # (Manual p.44) Starts counters
 
+	def count_reset(self):
+        self.write('CR') # (Manual p.45) Resets counters
 
+    def count_stop(self):
+        self.write('CH') # (Manual p.45) Stops counters
 
+    def count_start(self):
+        self.write('CS') # (Manual p.45) Starts counters
 
+    def gate_delay(self, channel = 'A'):
+        # (Manual p.44) Reports gate delay position
+        delay = float(self.query('GZ ' + ('0' if channel == 'A' else '1'))).rstrip())
+        return delay
 
+    def gate_delay_set(self, channel = 'A', delay = 0.0):
+        # (Manual p.44) Select gate 'A' or 'B', defaults to 'A'
+		# The selected gate delay is set to t seconds 
+        # where 0 <= t <= 999.2E-3, defaults to 0.0
+        if 0 <= delay <= 999.2E-3:
+            self.write('GD ' + ('0,' if channel == 'A' else '1,') + '%G' %delay)
+        else:
+            print('setting delay to 999.2E-3.')
+            tMax = 999.2E-3
+            self.write('GD ' + ('0,' if channel == 'A' else '1,') + '%G' %tMax)
 
-
-
+    def gate_mode(self, channel = 'A', mode = 'CW', read = False):
+        # (Manual p.43) Select gate 'A' or 'B', defaults to 'A'
        
