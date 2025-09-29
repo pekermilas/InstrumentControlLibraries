@@ -17,7 +17,7 @@ Created on Thu Sep 25 08:35:50 2025
 import pyvisa as visa
 import os
 
-os.chdir('C:/Users/admin/Documents/GitHub/InstrumentControlLibraries')
+# os.chdir('C:/Users/admin/Documents/GitHub/InstrumentControlLibraries')
 
 class sr400(object):
 
@@ -104,49 +104,25 @@ class sr400(object):
             count = int(self.query('QB ' + str(point)).rstrip())
         return count
 
-# -------------------------PUT THESE TOGETHER AS STATUS BYTE--------------------- 
-    def check_param_change(self):
-        return bool(int(self.query('SS 0').rstrip()))
-
-    def check_count_finish(self):
-        return bool(int(self.query('SS 1').rstrip()))
-
-    def check_scan_finish(self):
-        return bool(int(self.query('SS 2').rstrip()))
-
-    def check_overrun(self):
-        return bool(int(self.query('SS 3').rstrip()))
-
-    def check_gate_error(self):
-        # (Manual p.48) This bit is set whenever a gate is 
-        # missed. This can occur if a gate delay or width 
-        # exceeds the trigger period minus 1 µs
-        return bool(int(self.query('SS 4').rstrip()))
-
-    def check_recall_error(self):
-        # (Manual p.48) This bit is set if a recall from a stored 
-        # setting detects an error in the recalled data. If an 
-        # error is found, the instrument setup is not altered.
-        return bool(int(self.query('SS 5').rstrip()))
-
-    def check_SRQ(self):
-        # (Manual p.49)
-        return bool(int(self.query('SS 6').rstrip()))
-
-    def check_command_error(self):
-        # (Manual p.49)
-        return bool(int(self.query('SS 7').rstrip()))
-
-# -------------------------PUT THESE TOGETHER AS SECONDARY STATUS BYTE--------------------- 
-    def check_triggered(self):
-        return bool(int(self.query('SI 0').rstrip()))
-
-    def check_inhibited(self):
-        return bool(int(self.query('SI 1').rstrip()))
-
-    def check_counting(self):
-        return bool(int(self.query('SI 2').rstrip()))
-
+# -------------------------TEST HERE ONWARDS---------------------      
+    def check_status_byte(self, bit = 0):
+        # All in manual p.48-49
+        # 0 : Checks if parameter change
+        # 1 : Checks if count finished
+        # 2 : Checks if scan finished
+        # 3 : Checks if overrun
+        # 4 : Checks if gate error
+        # 5 : Checks if recall error
+        # 6 : Checks if SQR
+        # 7 : Checks if command error
+        return bool(int(self.query('SS '+str(bit)).rstrip())) 
+        
+    def check_secondary_status_byte(self, bit = 0):    
+        # All in manual p.48-49
+        # 0 : Checks if triggered
+        # 1 : Checks if inhibited
+        # 2 : Checks if counting
+        return bool(int(self.query('SI '+str(bit)).rstrip())) 
 
     def count_restart(self):
         self.write('CR') # (Manual p.45) Resets counters
@@ -159,4 +135,4 @@ class sr400(object):
 
 
 
-# -------------------------TEST HERE ONWARDS---------------------             
+       
