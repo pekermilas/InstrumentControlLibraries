@@ -45,6 +45,10 @@ class sr400(object):
                 self.dev.query("SS 1")
             except:    
                 self.dev = None
+            returnVal = 0
+        else:
+            returnVal = -1
+        return returnVal
 
     def close(self):
         if not self.dev is None:
@@ -52,14 +56,22 @@ class sr400(object):
             self.dev = None
             self.rm.close()
             self.rm = None
-
+            returnVal = 0
+        else:
+            returnVal = -1
+        return returnVal
+    
     def read(self):
         return self.dev.read()
     
     def write(self, writeStr = None):
         if not self.dev is None:
             self.dev.write(writeStr)
-
+            returnVal = 0
+        else:
+            returnVal = -1
+        return returnVal
+    
     def query(self, queryStr = None):
         if not self.dev is None:
             return self.dev.query(queryStr)
@@ -69,6 +81,7 @@ class sr400(object):
                    'COM': 4, 'STOP': 5, 'LOCAL': 6, 'RESET': 7,'LEFT': 8, 
                    'UP': 9, 'MODE': 10, 'AGATE': 11,'BGATE': 12, 'START': 13}
         self.write('CK ' + str(keydict[botton]))
+        return 0
 
     def read_cursor(self):
         cursordict = {'0\r': 'LEFT', '1\r': 'RIGHT', '2\r': 'INACTIVE'}
@@ -127,15 +140,18 @@ class sr400(object):
     def count_restart(self):
         self.write('CR') # (Manual p.45) Resets counters
         self.write('CS') # (Manual p.44) Starts counters
-
+        return 0
+    
     def count_reset(self):
         self.write('CR') # (Manual p.45) Resets counters
-
+        return 0
     def count_stop(self):
         self.write('CH') # (Manual p.45) Stops counters
-
+        return 0
+    
     def count_start(self):
         self.write('CS') # (Manual p.45) Starts counters
+        return 0
 
     def gate_delay(self, channel = 'A'):
         # (Manual p.44) Reports gate delay position
@@ -152,20 +168,40 @@ class sr400(object):
             print('setting delay to 999.2E-3.')
             tMax = 999.2E-3
             self.write('GD ' + ('0,' if channel == 'A' else '1,') + '%G' %tMax)
-
+        return 0
+    
     def gate_mode(self, channel = 'A', mode = 'CW', read = False):
         # (Manual p.43) Select gate 'A' or 'B', defaults to 'A'
-		'''
-		:param channel: DESCRIPTION, defaults to 'A'
-		:param mode: If it is changed to SCAN, the delay begins scanning from the start position on the next count period. If it is changed to FIXED, the delay returns to the start position immediately, defaults to 'CW'
-		:param query: True for asking, defaults to False for setting
-		'''
+        # param channel: DESCRIPTION, defaults to 'A'
+		# param mode: If it is changed to SCAN, the delay begins 
+        # scanning from the start position on the next count period. 
+        # If it is changed to FIXED, the delay returns to the start 
+        # position immediately, defaults to 'CW'
+		# param query: True for asking, defaults to False for setting
         gate_mode_dict = {'CW':0, 'FIXED':1, 'SCAN': 2}
         if read:
-            return self.query('GM '+ ('0' if channel == 'A' else '1')).rstrip()
+            returnVal = self.query('GM '+ ('0' if channel == 'A' else '1')).rstrip()
         else:
-            
-
+            if mode in list(gate_mode_dict):
+                self.write('GM '+ ('0,' if channel == 'A' else '1,') + str(gate_mode_dict[mode]))
+                returnVal = 0
+            else:
+                print('Non-valid gate mode!')
+                returnVal = -1
+        return returnVal
+    
+    def gate_scan_step(self, channel = 'A', step:float = 0.0, read = False):
+        if read:
+            returnVal = self.query('GY '+ ('0' if channel == 'A' else '1')).rstrip()
+        elif 0 <= step <= 999.2E-3:
+            self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %step)
+            returnVal = 0
+        else:
+            print('stetting range  to  99.92E-3.')
+            stepMax = 99.92E-3
+            self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %stepMax)
+            returnVal = 0
+        return returnVal
 
 
 
