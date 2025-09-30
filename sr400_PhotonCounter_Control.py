@@ -262,25 +262,47 @@ class sr400(object):
             returnVal = 0
         return returnVal
 
-	def reset_all(self):
+    def reset_all(self):
         self.write('CL')
         return 0
 
     def count_mode(self, mode = None):
+        # (Manual p.41)
         if mode is None:
-            self.query('CM').rstrip()
-        if mode == 0:
-            # Both A and B for T preset
-        if mode == 1:
-            # A-B for T preset
-        if mode == 2:
-            # A+B for T preset
-        if mode == 3:
-            # A for B preset
-            
-            
+            returnVal = self.query('CM').rstrip()
+        if mode == 'A,B': # Both A and B for T preset
+            self.write('CM 0')
+            returnVal = 0
+        if mode == 'A-B': # A-B for T preset
+            returnVal = 1
+            self.write('CM 1')
+        if mode == 'A+B': # A+B for T preset
+            returnVal = 2
+            self.write('CM 2')
+        if mode == 'A*B': # A for B preset
+            returnVal = 3
+            self.write('CM 3')
+        return returnVal
 
+    def dwell_time(self, dwell = None):
+        # (Manual p.42) Dwell time is in seconds!
+        if dwell is None:
+            returnVal = self.query('DT')
+        if dwell == 0:
+            self.write('DT 0')
+            returnVal = 'external'
+        if 2E-3 <= dwell <= 6E1:
+            self.write('DT %g' %dwell)
+            returnVal = str(dwell)
+        if 6E1 <= dwell <= 2E-3:
+            maxDwell = 6E1
+            self.write('DT %g' %maxDwell)
+            returnVal = str(maxDwell)
+        return returnVal
 
+    def set_discriminator_mode(self, channel = -1, fixed = True):
+        # (Manual p.42) Dwell time is in seconds!
+    
 
 
 
