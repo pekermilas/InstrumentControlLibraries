@@ -300,9 +300,35 @@ class sr400(object):
             returnVal = str(maxDwell)
         return returnVal
 
-    def set_discriminator_mode(self, channel = -1, fixed = True):
+    def set_discriminator_mode(self, channel = None, fixed = True):
         # (Manual p.42) Dwell time is in seconds!
-    
+        # Select A(0),B(1),T(2) channel, None for query
+        # True for FIXED, False for SCAN
+        if channel is None:
+            returnVal = [self.query('DM 0').rstrip(), self.query('DM 1').rstrip(), 
+                         self.query('DM 2').rstrip()]
+        else:
+            self.write('DM '+ str(channel) + (',0' if fixed else ',1'))
+            returnVal = 0
+        return returnVal
+
+    def set_disc_level(self, channel = 'ch1', level = 0.0, slope = True):
+# 		THIS IS STRAIGHT WRONG, SEE p.42 and p.43
+        """
+		:param channel: target channel, allowed string 'ch1', 'ch2', 'trigger'
+		:param level: gate trigger level, level in [-2.000, 2.000] Resolution is .001 V.
+		:param slope: gate trigger slope. True for RISE or positive, False for FALL or negative
+		"""
+		if channel == 'trigger':
+			self.write('TS ' + ('0' if slope else '1'))
+			self.write('TL ' + str(level))
+		else:
+			self.write('DS ' + ('0' if channel=='ch1' else '1') \
+						+ (',0' if slope else ',1'))
+			self.write('DL ' + ('0' if channel=='ch1' else '1') \
+						+ str(level))
+
+
 
 
 
