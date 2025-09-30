@@ -191,17 +191,54 @@ class sr400(object):
         return returnVal
     
     def gate_scan_step(self, channel = 'A', step:float = 0.0, read = False):
+        # (Manual p.43)
         if read:
             returnVal = self.query('GY '+ ('0' if channel == 'A' else '1')).rstrip()
-        elif 0 <= step <= 999.2E-3:
-            self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %step)
-            returnVal = 0
-        else:
-            print('stetting range  to  99.92E-3.')
-            stepMax = 99.92E-3
-            self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %stepMax)
-            returnVal = 0
+        else: 
+            if 0 <= step <= 999.2E-3:
+                self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %step)
+                returnVal = 0
+            else:
+                print('stetting range  to  99.92E-3.')
+                stepMax = 99.92E-3
+                self.write('GY ' + ('0,' if channel == 'A' else '1,') + '%G' %stepMax)
+                returnVal = 0
         return returnVal
+
+    def gate_width(self, channel = 'A', window = 0.0, read = False):
+        # (Manual p.44)
+        if read:
+            returnVal = self.query('GW '+ ('0' if channel == 'A' else '1')).rstrip()
+        else:
+            if 0.005E-6 <= window <= 999.2E-3::
+                self.write('GW ' + ('0,' if channel == 'A' else '1,') + '%G' %window)
+                returnVal = 0
+            else:
+                widthMax = 999.2E-3
+                self.write('GW ' + ('0,' if channel == 'A' else '1,') + '%G' %window)
+                returnVal = 0
+        return returnVal
+
+    def lcd_message(self, message, clear = False):
+        if clear:
+            self.write('MS')
+        else:
+            if len(message) <= 24: self.write('MS '+ message)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
