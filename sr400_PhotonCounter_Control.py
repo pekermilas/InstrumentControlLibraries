@@ -14,6 +14,10 @@ Created on Thu Sep 25 08:35:50 2025
 # t.open()
 # t.dev.query('SS 1')
 
+# I need to write proper default mechanism for all the methods
+# which uses read argument for their cases of not given the other
+# parameter!!!
+
 import pyvisa as visa
 import os
 
@@ -210,7 +214,7 @@ class sr400(object):
         if read:
             returnVal = self.query('GW '+ ('0' if channel == 'A' else '1')).rstrip()
         else:
-            if 0.005E-6 <= window <= 999.2E-3::
+            if 0.005E-6 <= window <= 999.2E-3:
                 self.write('GW ' + ('0,' if channel == 'A' else '1,') + '%G' %window)
                 returnVal = 0
             else:
@@ -219,19 +223,62 @@ class sr400(object):
                 returnVal = 0
         return returnVal
 
-    def lcd_message(self, message, clear = False):
-        if clear:
+    def lcd_message(self, message = None):
+        if message is None:
             self.write('MS')
         else:
-            if len(message) <= 24: self.write('MS '+ message)
+            if len(message) <= 24: 
+                self.write('MS '+ message)
+            else:
+                self.write('MS '+ message[:24])
+        return 0
 
+    def display_mode(self, conti = True):
+        self.write('SD ' + ('0' if conti else '1'))
+        return 0
 
+    def scan_periods(self, num = 0):
+        if num == 0:
+            returnVal = self.query('NP').rstrip()
+        else:
+            if 1 <= num <= 2000:
+                self.write('NP ' + str(num))
+                returnVal = 0
+            else:
+                maxNum = 2000
+                self.write('NP ' + str(maxNum))
+                returnVal = -1
+        return returnVal
 
+    def scan_position(self):
+        return self.query('NN').rstrip()
+    
+    def scan_end_mode(self, mode = 'STOP', read = False):
+        if read:
+            status = bool(int(self.query('NE').rstrip()))
+            returnVal = 'STOP' if status else 'START'
+        else:
+            self.write('NE ' + ('0' if mode=='STOP' else '1'))
+            returnVal = 0
+        return returnVal
 
+	def reset_all(self):
+        self.write('CL')
+        return 0
 
-
-
-
+    def count_mode(self, mode = None):
+        if mode is None:
+            self.query('CM').rstrip()
+        if mode == 0:
+            # Both A and B for T preset
+        if mode == 1:
+            # A-B for T preset
+        if mode == 2:
+            # A+B for T preset
+        if mode == 3:
+            # A for B preset
+            
+            
 
 
 
