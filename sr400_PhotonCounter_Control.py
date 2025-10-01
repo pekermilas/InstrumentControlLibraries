@@ -122,7 +122,7 @@ class sr400(object):
         return count
 
 # -------------------------TEST HERE ONWARDS---------------------      
-    def check_status_byte(self, bit = 0):
+    def read_status_byte(self, bit = 0):
         # All in manual p.48-49
         # 0 : Checks if parameter change
         # 1 : Checks if count finished
@@ -134,7 +134,7 @@ class sr400(object):
         # 7 : Checks if command error
         return bool(int(self.query('SS '+str(bit)).rstrip())) 
         
-    def check_secondary_status_byte(self, bit = 0):    
+    def read_secondary_status_byte(self, bit = 0):    
         # All in manual p.48-49
         # 0 : Checks if triggered
         # 1 : Checks if inhibited
@@ -312,7 +312,56 @@ class sr400(object):
             returnVal = 0
         return returnVal
 
-    def set_disc_level(self, channel = 'ch1', level = 0.0, slope = True):
+    def set_gate_trigger(self, slope = None, level = None):
+        returnVal = 0
+        if slope is None:
+            self.query('TS').rstrip()
+        if slope == 'RISE':
+            self.write('TS 0')
+        if slope == 'FALL':
+            self.write('TS 1')
+        if not (slope == 'FALL' or slope == 'RISE'):
+            self.write('TS 0')
+            returnVal = -1
+
+        if level is None:
+            self.query('TL').rstrip()
+        if -2.0 <= level <= 2.0:
+            self.write('TL '+ '%G' %level)
+        if 2.0 <= level <= -2.0:
+            midLevel = 0.0
+            self.write('TL '+ '%G' %midLevel)
+            returnVal = -1
+        
+        return returnVal
+            
+    def set_discriminator_trigger(self, channel = None, slope = None, level = None):
+        returnVal = 0
+        if slope is None:
+            self.query('TS').rstrip()
+        if slope == 'RISE':
+            self.write('TS 0')
+        if slope == 'FALL':
+            self.write('TS 1')
+        if not (slope == 'FALL' or slope == 'RISE'):
+            self.write('TS 0')
+            returnVal = -1
+
+        if level is None:
+            self.query('TL').rstrip()
+        if -2.0 <= level <= 2.0:
+            self.write('TL '+ '%G' %level)
+        if 2.0 <= level <= -2.0:
+            midLevel = 0.0
+            self.write('TL '+ '%G' %midLevel)
+            returnVal = -1
+        
+        return returnVal
+    
+    
+    
+    
+    def set_discriminator_level(self, channel = 'ch1', level = 0.0, slope = True):
 # 		THIS IS STRAIGHT WRONG, SEE p.42 and p.43
         """
 		:param channel: target channel, allowed string 'ch1', 'ch2', 'trigger'
