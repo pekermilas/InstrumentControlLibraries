@@ -21,37 +21,6 @@ Created on Thu Sep 25 08:35:50 2025
 import pyvisa as visa
 import os
 
-# os.chdir('C:/Users/admin/Documents/GitHub/InstrumentControlLibraries')
-# Composition with Helper Classes python
-
-# class mode:
-#     # aaa
-#     print("mode")
-    
-# class levels:
-#     # bbb
-#     print("levels")
-    
-# class gates:
-#     # ccc
-#     print("gates")
-    
-# class front_panel:
-#     # ddd
-#     print("front panel")
-    
-# class store_recall:
-#     # eee
-#     print("store recall")
-    
-# class interface:
-#     # fff
-#     print("interface")
-    
-# class data:
-#     # ggg
-#     print("data")
-
 class sr400:
 
     def __init__(self, port = None):
@@ -109,7 +78,7 @@ class sr400:
         if not self.dev is None:
             return self.dev.query(queryStr)
 
-# Section MODE:
+# ----------------------- SECTION MODE START ------------------------------- #
     def mode_countMode(self, mode = None):
         # (Manual p.41)
         modeDict = {'A,B': 0, 'A-B': 1, 'A+B': 2, 'A*B': 3}
@@ -204,10 +173,10 @@ class sr400:
                 if dwellTime==0:
                     self.write('DT ' + '%G' %dwellTime)
                     returnVal = 1
-                if dwellTime <= 2E-3:
+                if dwellTime < 2E-3:
                     self.write('DT ' + '%G' %2E-3)
                     returnVal = -1
-                if dwellTime >= 6E1:
+                if dwellTime > 6E1:
                     self.write('DT ' + '%G' %6E1)
                     returnVal = -1
         return returnVal
@@ -225,9 +194,88 @@ class sr400:
                 returnVal = -1
         return returnVal
 
+    def mode_analogOutputScale(self, outputScale = None): # CHECK THE DEFAULT!!!
+        if outputScale is None:
+            returnVal = self.query('AM').rstrip()
+        else:
+            if outputScale < 0:
+                self.write('AM ' + '%G' %0)
+                returnVal = -1
+            elif outputScale > 7:
+                self.write('AM ' + '%G' %7)
+                returnVal = -1
+            elif 0 <= outputScale <= 7:
+                self.write('AM ' + '%G' %int(outputScale))
+                returnVal = 0
+            else:
+                self.write('AM ' + '%G' %0)
+                returnVal = -1
+        return returnVal
+
+    def mode_setDisplayMode(self, dispMode = None): # CHECK THE DEFAULT!!!
+        dispModeDict = {'continuous': 0, 'hold': 1}
+        if dispMode is None:
+            returnVal = self.query('SD').rstrip()
+        else:
+            if dispMode == 'continuous' or dispMode == 'hold':
+                self.write('SD '+ '%G' %dispModeDict[dispMode])
+                returnVal = 0
+            else:
+                self.write('SD '+ '%G' %0)
+                returnVal = -1
+        return returnVal
+# ----------------------- SECTION MODE END ------------------------------- #
+##################
+# ----------------------- SECTION LEVELS START ------------------------------- #
+    def levels_triggerSlope(self, trigSlope = None): # CHECK THE DEFAULT!!!
+        tSlopeDict = {'rise': 0, 'fall': 1}
+        if trigSlope is None:
+            returnVal = self.query('TS').rstrip()
+        else:
+            if trigSlope == 'rise' or trigSlope == 'fall':
+                self.write('TS '+ '%G' %tSlopeDict[trigSlope])
+                returnVal = 0
+            else:
+                self.write('TS '+ '%G' %0)
+                returnVal = -1
+        return returnVal
+
+    def levels_triggerLevel(self, trigLevel = None): # CHECK THE DEFAULT!!!
+        if trigLevel is None:
+            returnVal = self.query('TL').rstrip()
+        else:
+            if -2.0 <= trigLevel <= 2.0:
+                self.write('TL '+ '%G' %trigLevel)
+                returnVal = 0
+            elif trigLevel < -2.0:
+                self.write('TL '+ '%G' %-2.0)
+                returnVal = -1
+            elif trigLevel > 2.0:
+                self.write('TL '+ '%G' %2.0)
+                returnVal = -1
+            else:
+                self.write('TL '+ '%G' %0)
+                returnVal = -1
+        return returnVal
+
+    def levels_discriminatorSlope(self, disc = 'A', discSlope = None):  # CHECK THE DEFAULT!!!
+        discDict = {'A': 0, 'B': 1, 'T':2}
+        discSlopeDict = {'rise': 0, 'fall': 1}
+        if discSlope is None:
+            returnVal = self.query('DS ' + '%G' %discDict[disc]).rstrip()
+        else:
+            if discSlope == 'rise' or discSlope == 'fall':
+                self.write('DS '+ '%G' %discDict[disc] + ',' + 
+                           '%G' %discSlopeDict[discSlope])
+                returnVal = 0
+            else:
+                self.write('TS '+ '%G' %0)
+                returnVal = -1
+        return returnVal
 
 
-        
+
+
 #------------------------------OLD CODE-----------------------------------------
 #     def simulate_button(self, botton = 'STOP'):
 #         keydict = {'DOWN': 0, 'RIGHT': 1, 'LEVEL': 2, 'SETUP': 3, 
