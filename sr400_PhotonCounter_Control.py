@@ -109,7 +109,93 @@ class sr400:
         if not self.dev is None:
             return self.dev.query(queryStr)
 
+# Section mode:
+    def mode_countMode(self, mode = None):
+        # (Manual p.41)
+        if mode is None:
+            returnVal = self.query('CM').rstrip()
+        if mode == 'A,B': # Both A and B for T preset
+            self.write('CM 0')
+            returnVal = 0
+        if mode == 'A-B': # A-B for T preset
+            returnVal = 1
+            self.write('CM 1')
+        if mode == 'A+B': # A+B for T preset
+            returnVal = 2
+            self.write('CM 2')
+        if mode == 'A*B': # A for B preset
+            returnVal = 3
+            self.write('CM 3')
+        return returnVal
 
+    def mode_counterToInput(self, counter = 'A', counterInput = None):
+        counterDict = {'A': 0, 'B': 1, 'T': 2}
+        if counterInput is None:
+            returnVal = self.query('CI '+ '%G' %counterDict[counter]).rstrip()
+        else:
+            if counter == 'A':
+                if counterInput == 0 or counterInput == 1:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
+                    returnVal = 0
+                else:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %0)
+                    returnVal = -1
+            if counter == 'B':
+                if counterInput == 1 or counterInput == 2:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
+                    returnVal = 0
+                else:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %1)
+                    returnVal = -1
+            if counter == 'T':
+                if counterInput == 0 or counterInput == 2 or counterInput == 3:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
+                    returnVal = 0
+                else:
+                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %0)
+                    returnVal = -1
+        return returnVal
+        
+    def mode_counterPreset(self, counter = 'A', counterPreset = None):
+        # counterPreset is not ins seconds! It is number of cycles of 10MHz clock
+        counterDict = {'A': 0, 'B': 1, 'T': 2}
+        if counterPreset is None:
+            returnVal = self.query('CP '+ '%G' %counterDict[counter]).rstrip()
+        else:
+            if 1 <= counterPreset <= 9E11:
+                self.write('CP '+ '%G' %counterDict[counter] + ',' + '%G' %counterPreset)
+                returnVal = 0
+            else:
+                self.write('CP '+ '%G' %counterDict[counter] + ',' + '%G' %9E11)
+                returnVal = -1
+        return returnVal
+        
+    def mode_scanPeriods(self, num = 0):
+        if num == 0:
+            returnVal = self.query('NP').rstrip()
+        else:
+            if 1 <= num <= 2000:
+                self.write('NP ' + str(num))
+                returnVal = 0
+            else:
+                maxNum = 2000
+                self.write('NP ' + str(maxNum))
+                returnVal = -1
+        return returnVal
+
+    def mode_scanPosition(self):
+        return self.query('NN').rstrip()
+
+    def mode_scanEnd(self, scanMode = None):
+        if scanMode is None:
+            returnVal = self.query('NE').rstrip()
+        else:
+            if scanMode == 0 or scanMode == 1:
+                self.write('NE '+ '%G' %scanMode)
+                returnVal = 0
+            else:
+                self.write('NE '+ '%G' %0)
+                returnVal = -1
 
 #------------------------------OLD CODE-----------------------------------------
 #     def simulate_button(self, botton = 'STOP'):
