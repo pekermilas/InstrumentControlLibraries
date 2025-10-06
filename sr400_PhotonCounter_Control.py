@@ -24,33 +24,33 @@ import os
 # os.chdir('C:/Users/admin/Documents/GitHub/InstrumentControlLibraries')
 # Composition with Helper Classes python
 
-class mode:
-    # aaa
-    print("mode")
+# class mode:
+#     # aaa
+#     print("mode")
     
-class levels:
-    # bbb
-    print("levels")
+# class levels:
+#     # bbb
+#     print("levels")
     
-class gates:
-    # ccc
-    print("gates")
+# class gates:
+#     # ccc
+#     print("gates")
     
-class front_panel:
-    # ddd
-    print("front panel")
+# class front_panel:
+#     # ddd
+#     print("front panel")
     
-class store_recall:
-    # eee
-    print("store recall")
+# class store_recall:
+#     # eee
+#     print("store recall")
     
-class interface:
-    # fff
-    print("interface")
+# class interface:
+#     # fff
+#     print("interface")
     
-class data:
-    # ggg
-    print("data")
+# class data:
+#     # ggg
+#     print("data")
 
 class sr400:
 
@@ -109,23 +109,18 @@ class sr400:
         if not self.dev is None:
             return self.dev.query(queryStr)
 
-# Section mode:
+# Section MODE:
     def mode_countMode(self, mode = None):
         # (Manual p.41)
+        modeDict = {'A,B': 0, 'A-B': 1, 'A+B': 2, 'A*B': 3}
         if mode is None:
             returnVal = self.query('CM').rstrip()
-        if mode == 'A,B': # Both A and B for T preset
-            self.write('CM 0')
+        if mode in list(modeDict):
+            self.write('CM ' + '%G' %modeDict[mode])
             returnVal = 0
-        if mode == 'A-B': # A-B for T preset
-            returnVal = 1
-            self.write('CM 1')
-        if mode == 'A+B': # A+B for T preset
-            returnVal = 2
-            self.write('CM 2')
-        if mode == 'A*B': # A for B preset
-            returnVal = 3
-            self.write('CM 3')
+        else:
+            self.write('CM ' + '%G' %0)
+            returnVal = -1
         return returnVal
 
     def mode_counterToInput(self, counter = 'A', counterInput = None):
@@ -156,9 +151,9 @@ class sr400:
                     returnVal = -1
         return returnVal
         
-    def mode_counterPreset(self, counter = 'A', counterPreset = None):
+    def mode_counterPreset(self, counter = 'B', counterPreset = None):
         # counterPreset is not ins seconds! It is number of cycles of 10MHz clock
-        counterDict = {'A': 0, 'B': 1, 'T': 2}
+        counterDict = {'B': 1, 'T': 2}
         if counterPreset is None:
             returnVal = self.query('CP '+ '%G' %counterDict[counter]).rstrip()
         else:
@@ -179,7 +174,7 @@ class sr400:
                 returnVal = 0
             else:
                 maxNum = 2000
-                self.write('NP ' + str(maxNum))
+                self.write('NP ' + + '%G' %maxNum)
                 returnVal = -1
         return returnVal
 
@@ -196,7 +191,43 @@ class sr400:
             else:
                 self.write('NE '+ '%G' %0)
                 returnVal = -1
+        return returnVal
 
+    def mode_dwellTime(self, dwellTime = None):
+        if dwellTime is None:
+            returnVal = self.query('DT').rstrip()
+        else:
+            if 2E-3 <= dwellTime <= 6E1:
+                self.write('DT ' + '%G' %dwellTime)
+                returnVal = 0
+            else:
+                if dwellTime==0:
+                    self.write('DT ' + '%G' %dwellTime)
+                    returnVal = 1
+                if dwellTime <= 2E-3:
+                    self.write('DT ' + '%G' %2E-3)
+                    returnVal = -1
+                if dwellTime >= 6E1:
+                    self.write('DT ' + '%G' %6E1)
+                    returnVal = -1
+        return returnVal
+
+    def mode_analogSource(self, counter = None):
+        sourceDict = {'A': 0, 'B': 1, 'A-B': 2, 'A+B': 3}
+        if counter is None:
+            returnVal = self.query('AS').rstrip()
+        else:
+            if counter in list(sourceDict):
+                self.write('AS ' + '%G' %sourceDict[counter])
+                returnVal = 0
+            else:
+                self.write('AS ' + '%G' %0)
+                returnVal = -1
+        return returnVal
+
+
+
+        
 #------------------------------OLD CODE-----------------------------------------
 #     def simulate_button(self, botton = 'STOP'):
 #         keydict = {'DOWN': 0, 'RIGHT': 1, 'LEVEL': 2, 'SETUP': 3, 
