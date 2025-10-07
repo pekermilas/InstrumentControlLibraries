@@ -226,7 +226,7 @@ class sr400:
         return returnVal
 # ----------------------- SECTION MODE END ------------------------------- #
 ##################
-# ----------------------- SECTION LEVELS START ------------------------------- #
+# ----------------------- SECTION LEVELS START --------------------------- #
     def levels_triggerSlope(self, trigSlope = None): # CHECK THE DEFAULT!!!
         tSlopeDict = {'rise': 0, 'fall': 1}
         if trigSlope is None:
@@ -254,7 +254,7 @@ class sr400:
                 self.write('TL '+ '%G' %2.0)
                 returnVal = -1
             else:
-                self.write('TL '+ '%G' %0)
+                self.write('TL '+ '%G' %0.1)
                 returnVal = -1
         return returnVal
 
@@ -269,13 +269,209 @@ class sr400:
                            '%G' %discSlopeDict[discSlope])
                 returnVal = 0
             else:
-                self.write('TS '+ '%G' %0)
+                self.write('DS '+ '%G' %0)
                 returnVal = -1
         return returnVal
 
+    def levels_discriminatorMode(self, disc = 'A', discMode = None):  # CHECK THE DEFAULT!!!
+        discDict = {'A': 0, 'B': 1, 'T':2}
+        discModeDict = {'fixed': 0, 'scan': 1}
+        if discMode is None:
+            returnVal = self.query('DM ' + '%G' %discDict[disc]).rstrip()
+        else:
+            if discMode == 'fixed' or discMode == 'scan':
+                self.write('DM '+ '%G' %discDict[disc] + ',' + 
+                           '%G' %discModeDict[discSlope])
+                returnVal = 0
+            else:
+                self.write('DM '+ '%G' %0)
+                returnVal = -1
+        return returnVal
+
+    def levels_discriminatorScanStepSize(self, disc = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
+        discDict = {'A': 0, 'B': 1, 'T':2}    
+        if stepSize is None:
+            returnVal = self.query('DY ' + '%G' %discDict[disc]).rstrip()
+        else:
+            if -2.0 <= stepSize <= 2.0:
+                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %stepSize)
+                returnVal = 0
+            elif stepSize < -2.0:
+                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %-2.0)
+                returnVal = -1
+            elif stepSize > 2.0:
+                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %2.0)
+                returnVal = -1
+            else:
+                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+
+    def levels_discriminatorLevel(self, disc = 'A', discLevel = None):  # CHECK THE DEFAULT!!!
+        discDict = {'A': 0, 'B': 1, 'T':2}
+        if stepSize is None:
+            returnVal = self.query('DL ' + '%G' %discDict[disc]).rstrip()
+        else:
+            if -0.3 <= stepSize <= 0.3:
+                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %discLevel)
+                returnVal = 0
+            elif stepSize < -0.3:
+                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %-0.3)
+                returnVal = -1
+            elif stepSize > 0.3:
+                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %0.3)
+                returnVal = -1
+            else:
+                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %0.01)
+                returnVal = -1
+        return returnVal
+    
+    def levels_discriminatorLevelDuringScan(self, disc = 'A'):  # CHECK THE DEFAULT!!!
+        discDict = {'A': 0, 'B': 1, 'T':2}
+        return self.query('DZ ' + '%G' %discDict[disc]).rstrip()
+    
+    def levels_rearPanelPortMode(self, port = 'port1', portMode = None):  # CHECK THE DEFAULT!!!
+        portDict = {'port1': 1, 'port2': 2}
+        portModeDict = {'fixed': 0, 'scan': 1}
+        if portMode is None:
+            returnVal = self.query('PM ' + '%G' %portDict[port]).rstrip()
+        else:
+            if portMode == 'fixed' or portMode == 'scan':
+                self.write('PM '+ '%G' %portDict[port] + ',' + 
+                           '%G' %portModeDict[portMode])
+                returnVal = 0
+            else:
+                self.write('PM '+ '%G' %0)
+                returnVal = -1
+        return returnVal
+    
+    def levels_rearPanelPortScanStepSize(self, port = 'port1', stepSize = None):  # CHECK THE DEFAULT!!!
+        portDict = {'port1': 1, 'port2': 2}
+        if stepSize is None:
+            returnVal = self.query('PY ' + '%G' %portDict[port]).rstrip()
+        else:
+            if -0.5 <= stepSize <= 0.5:
+                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %stepSize)
+                returnVal = 0
+            elif stepSize < -0.5:
+                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %-0.5)
+                returnVal = -1
+            elif stepSize > 0.5:
+                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %0.5)
+                returnVal = -1
+            else:
+                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+
+    def levels_rearPanelPortOutputLevel(self, port = 'port1', voltLevel = None):  # CHECK THE DEFAULT!!!
+        portDict = {'port1': 1, 'port2': 2}
+        if voltLevel is None:
+            returnVal = self.query('PL ' + '%G' %portDict[port]).rstrip()
+        else:
+            if -10.0 <= stepSize <= 10.0:
+                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %voltLevel)
+                returnVal = 0
+            elif stepSize < -10.0:
+                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %-10.0)
+                returnVal = -1
+            elif stepSize > 10.0:
+                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %10.0)
+                returnVal = -1
+            else:
+                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+
+    def levels_rearPanelPortLevelDuringScan(self, port = 'port1'):  # CHECK THE DEFAULT!!!
+        portDict = portDict = {'port1': 1, 'port2': 2}
+        return self.query('PZ ' + '%G' %portDict[port]).rstrip()
+# ----------------------- SECTION LEVELS END ----------------------------- #
+##################
+# ----------------------- SECTION GATES START --------------------------- #
+    def gates_gateMode(self, gate = 'A', gateMode = None):  # CHECK THE DEFAULT!!!
+        gateDict = {'A': 1, 'B': 2}
+        gateModeDict = {'cw': 0, 'fixed': 1, 'scan': 2}
+        if gateMode is None:
+            returnVal = self.query('GM ' + '%G' %gateDict[gate]).rstrip()
+        else:
+            if gateMode == 'cw' or gateMode == 'fixed' or gateMode == 'scan':
+                self.write('GM '+ '%G' %gateDict[gate] + ',' + 
+                           '%G' %gateModeDict[gateMode])
+                returnVal = 0
+            else:
+                self.write('GM '+ '%G' %1)
+                returnVal = -1
+        return returnVal
+
+    def gates_gateScanStepSize(self, gate = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
+        gateDict = {'A': 1, 'B': 2}
+        if stepSize is None:
+            returnVal = self.query('GY ' + '%G' %gateDict[port]).rstrip()
+        else:
+            if 0.0 <= stepSize <= 99.92E-3:
+                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %stepSize)
+                returnVal = 0
+            elif stepSize < 0.0:
+                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %0.0)
+                returnVal = -1
+            elif stepSize > 99.92E-3:
+                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %99.92E-3)
+                returnVal = -1
+            else:
+                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+
+    def gates_gateDelay(self, gate = 'A', gateDelay = None):  # CHECK THE DEFAULT!!!
+        gateDict = {'A': 1, 'B': 2}
+        if stepSize is None:
+            returnVal = self.query('GD ' + '%G' %gateDict[gate]).rstrip()
+        else:
+            if 0.0 <= stepSize <= 999.2E-3:
+                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %gateDelay)
+                returnVal = 0
+            elif stepSize < 0.0:
+                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %0.0)
+                returnVal = -1
+            elif stepSize > 999.2E-3:
+                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %999.2E-3)
+                returnVal = -1
+            else:
+                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+
+    def mode_scanPosition(self, gate = 'A'):
+        gateDict = {'A': 1, 'B': 2}
+        return self.query('GZ ' + '%G' %gateDict[gate]).rstrip()
+
+    def gates_gateWidth(self, gate = 'A', gateWidth = None):  # CHECK THE DEFAULT!!!
+        gateDict = {'A': 1, 'B': 2}
+        if gateWidth is None:
+            returnVal = self.query('GW ' + '%G' %gateDict[gate]).rstrip()
+        else:
+            if 0.005E-6 <= stepSize <= 999.2E-3:
+                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %stepSize)
+                returnVal = 0
+            elif stepSize < 0.005E-6:
+                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %0.005E-6)
+                returnVal = -1
+            elif stepSize > 999.2E-3:
+                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %999.2E-3)
+                returnVal = -1
+            else:
+                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
+                returnVal = -1
+        return returnVal
+# ----------------------- SECTION GATES END ----------------------------- #
+##################
+# ------------------ SECTION FRONT PANEL START -------------------------- #
 
 
 
+
+    
 #------------------------------OLD CODE-----------------------------------------
 #     def simulate_button(self, botton = 'STOP'):
 #         keydict = {'DOWN': 0, 'RIGHT': 1, 'LEVEL': 2, 'SETUP': 3, 
