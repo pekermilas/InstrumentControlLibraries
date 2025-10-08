@@ -467,11 +467,89 @@ class sr400:
 # ----------------------- SECTION GATES END ----------------------------- #
 ##################
 # ------------------ SECTION FRONT PANEL START -------------------------- #
-
-
-
-
+    def frontPanel_counterStart(self):
+        self.write('CS')
+        return 0
     
+    def frontPanel_counterStop(self):
+        self.write('CH')
+        return 0
+
+    def frontPanel_counterReset(self):
+        self.write('CR')
+        return 0
+
+    def frontPanel_pressButton(self, button = 'down cursor'):
+        buttonDict = {'down cursor': 0, 'right cursor': 1, 'level': 2,
+                      'setup': 3, 'com': 4, 'stop': 5, 'local': 6,
+                      'reset': 7, 'left cursor': 8, 'up cursor': 9,
+                      'mode': 10, 'agate': 11, 'bgate': 12, 'start': 13}
+        if button in list(buttonDict):
+            self.write('CK '+ '%G' %buttonDict[button]))
+            returnVal = 0
+        else:
+            self.write('CK '+ '%G' %buttonDict['stop']))
+            returnVal = -1
+        return returnVal
+
+    def frontPanel_cursorPosition(self):
+        cursorDict = {0: 'returned for left', 1: 'returned for right',
+                      2: 'inactive'}
+        returnVal = cursorDict[self.query('SC').rstrip()]
+        return returnVal
+
+    def frontPanel_modeInhibit(self, mode = 'local'):
+        modeInhibDict = {0: 'local', 1: 'remote', 2: 'lock-out'}
+        if mode in list(modeInhibDict):
+            self.write('MI '+ '%G' %modeInhibDict[mode]))
+            returnVal = 0
+        else:
+            self.write('MI '+ '%G' %0))
+            returnVal = -1
+        return returnVal
+
+    def frontPanel_messageString(self, mssg = None):
+        self.write('MS '+ '%G' %mssg))
+        return 0
+    
+    def frontPanel_menuDisplay(self, select = 'count'):
+        displayDict = {'count': [1,1], 'A': [1,2], 'B': [1,3],'T': [1,4], 
+                       'n-periods': [1,5], 'at-n':[1,6], 'd/a-out': [1,7], 
+                       'd/a-range': [1,8], 'display': [1,9], 'a-gate': [2,1],
+                       'a-delay': [2,2], 'a-width': [2,3], 'b-gate': [3,1],
+                       'b-delay': [3,2], 'b-width': [3,3], 'trig-slope': [4,1],
+                       'trig-lvl': [4,2], 'a-disc-slope': [4,3], 
+                       'a-disc-mode': [4,4], 'a-disc-lvl': [4,5],
+                       'b-disc-slope': [4,6], 'b-disc-mode': [4,7],
+                       'b-disc-lvl': [4,8], 't-disc-slope': [4,9],
+                       't-disc-mode': [4,10], 't-disc-lvl': [4,11],
+                       'port1-mode': [4,12], 'port1-lvl': [4,13],
+                       'port2-mode': [4,12], 'port2-lvl': [4,13],
+                       'gpib-addr': [5,1], 'rs232-baud': [5,2],
+                       'rs232-bits': [5,3], 'rs232-parity': [5,4],
+                       'rs232-wait': [5,5], 'rs232-echo': [5,6], 'data': [5,7],
+                       'lcd-contrast': [6,1], 'store': [6,2], 'recall': [6,3]}
+        if select in list(displayDict):
+            self.write('MD '+ '%G' %displayDict[select][0] + ',' +
+                       '%G' %displayDict[select][1])
+            returnVal = 0
+        else:
+            self.write('MD '+ '%G' %1 + ',' + '%G' %1)
+            returnVal = -1
+        return returnVal
+
+    def frontPanel_getMenuNumber(self):
+        return self.read('MM').rstrip()
+
+    def frontPanel_getMenuLine(self):
+        return self.read('ML').rstrip()
+# ------------------- SECTION FRONT PANEL END --------------------------- #
+##################
+# ------------------- SECTION INTERFACE START --------------------------- #
+
+
+
+
 #------------------------------OLD CODE-----------------------------------------
 #     def simulate_button(self, botton = 'STOP'):
 #         keydict = {'DOWN': 0, 'RIGHT': 1, 'LEVEL': 2, 'SETUP': 3, 
