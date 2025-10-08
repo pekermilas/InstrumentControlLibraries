@@ -10,9 +10,12 @@ Created on Thu Sep 25 08:35:50 2025
 # t.dev.query('SS 1')
 
 # EXAMPLE CALLS
+# import sr400_PhotonCounter_Control as sr400
 # t = sr400.sr400()
 # t.open()
-# t.dev.query('SS 1')
+# t.frontPanel_messageString('hello there!')
+# t.close()
+
 
 # I need to write proper default mechanism for all the methods
 # which uses read argument for their cases of not given the other
@@ -226,7 +229,7 @@ class sr400:
         return returnVal
 # ----------------------- SECTION MODE END ------------------------------- #
 ##################
-# ----------------------- SECTION LEVELS START --------------------------- #
+# --------------------- SECTION LEVELS START ----------------------------- #
     def levels_triggerSlope(self, trigSlope = None): # CHECK THE DEFAULT!!!
         tSlopeDict = {'rise': 0, 'fall': 1}
         if trigSlope is None:
@@ -442,7 +445,7 @@ class sr400:
                 returnVal = -1
         return returnVal
 
-    def mode_scanPosition(self, gate = 'A'):
+    def gates_delayPosition(self, gate = 'A'):
         gateDict = {'A': 1, 'B': 2}
         return self.query('GZ ' + '%G' %gateDict[gate]).rstrip()
 
@@ -485,10 +488,10 @@ class sr400:
                       'reset': 7, 'left cursor': 8, 'up cursor': 9,
                       'mode': 10, 'agate': 11, 'bgate': 12, 'start': 13}
         if button in list(buttonDict):
-            self.write('CK '+ '%G' %buttonDict[button]))
+            self.write('CK '+ '%G' %buttonDict[button])
             returnVal = 0
         else:
-            self.write('CK '+ '%G' %buttonDict['stop']))
+            self.write('CK '+ '%G' %buttonDict['stop'])
             returnVal = -1
         return returnVal
 
@@ -501,15 +504,15 @@ class sr400:
     def frontPanel_modeInhibit(self, mode = 'local'):
         modeInhibDict = {0: 'local', 1: 'remote', 2: 'lock-out'}
         if mode in list(modeInhibDict):
-            self.write('MI '+ '%G' %modeInhibDict[mode]))
+            self.write('MI '+ '%G' %modeInhibDict[mode])
             returnVal = 0
         else:
-            self.write('MI '+ '%G' %0))
+            self.write('MI '+ '%G' %0)
             returnVal = -1
         return returnVal
 
     def frontPanel_messageString(self, mssg = None):
-        self.write('MS '+ '%G' %mssg))
+        self.write('MS '+ '%G' %mssg)
         return 0
     
     def frontPanel_menuDisplay(self, select = 'count'):
@@ -546,6 +549,112 @@ class sr400:
 # ------------------- SECTION FRONT PANEL END --------------------------- #
 ##################
 # ------------------- SECTION INTERFACE START --------------------------- #
+    def interface_fullReset(self):
+        self.write('CL')
+        return 0
+
+    def interface_readStatusByte(self, bit = None):
+        # All in manual p.48-49
+        # 0 : Checks if parameter change
+        # 1 : Checks if count finished
+        # 2 : Checks if scan finished
+        # 3 : Checks if overrun
+        # 4 : Checks if gate error
+        # 5 : Checks if recall error
+        # 6 : Checks if SQR
+        # 7 : Checks if command error
+        if bit is None:
+            returnVal = self.query('SS').rstrip()
+        elif 0 <= bit <= 7:
+            returnVal = self.query('SS '+ '%G' %bit).rstrip()
+        else:
+            returnVal = self.query('SS').rstrip()
+        return returnVal
+
+    def interface_readSecondaryStatusByte(self, bit = None):
+        # All in manual p.48-49
+        # 0 : Checks if triggered
+        # 1 : Checks if inhibited
+        # 2 : Checks if counting
+        if bit is None:
+            returnVal = self.query('SI').rstrip()
+        elif 0 <= bit <= 2:
+            returnVal = self.query('SI '+ '%G' %bit).rstrip()
+        else:
+            returnVal = self.query('SI').rstrip()
+        return returnVal
+
+    def interface_gpibServiceRequest(self, value = None):
+        if value is None:
+            returnVal = self.query('SV').rstrip()
+        elif 0 <= value <= 255:
+            returnVal = self.query('SV '+ '%G' %value).rstrip()
+        else:
+            returnVal = self.query('SV').rstrip()
+        return returnVal
+
+    def interface_rs232CharWaitInterval(self, multiples = None):
+        if multiples is None:
+            returnVal = self.query('SW').rstrip()
+        elif 0 <= value <= 25:
+            returnVal = self.query('SW '+ '%G' %multiples).rstrip()
+        else:
+            returnVal = self.query('SW').rstrip()
+        return returnVal
+
+    def interface_rs232EndOfRecordChars(self, codes = [None, None, None, None]):
+        if codes[0] is None:
+            self.write('SE')
+        elif codes[1] is None:
+            j = codes[0] if 0 <= codes[0] <= 127 else 127
+            self.write('SE '+ '%G' %j)
+        elif codes[2] is None:
+            j = codes[0] if 0 <= codes[0] <= 127 else 127
+            k = codes[1] if 0 <= codes[1] <= 127 else 127
+            self.write('SE '+ '%G' %j + ',' + '%G' %k)
+        elif codes[3] is None:
+            j = codes[0] if 0 <= codes[0] <= 127 else 127
+            k = codes[1] if 0 <= codes[1] <= 127 else 127
+            l = codes[2] if 0 <= codes[2] <= 127 else 127
+            self.write('SE '+ '%G' %j + ',' + '%G' %k + ',' + 
+                       '%G' %l)
+        else:
+            j = codes[0] if 0 <= codes[0] <= 127 else 127
+            k = codes[1] if 0 <= codes[1] <= 127 else 127
+            l = codes[2] if 0 <= codes[2] <= 127 else 127
+            m = codes[0] if 0 <= codes[3] <= 127 else 127
+            self.write('SE '+ '%G' %j + ',' + '%G' %k + ',' + 
+                       '%G' %l + ',' + '%G' %m)
+        return 0
+# -------------------- SECTION INTERFACE END ---------------------------- #
+##################
+# ------------------ SECTION STORE/RECALL START ------------------------- #
+    def storerecall_storeSettings(self, location = 1):
+        if 1 <= location <= 9:
+            self.write('ST '+ '%G' %location)
+            returnVal = 0
+        elif location < 1:
+            self.write('ST '+ '%G' %1)
+            returnVal = 1
+        elif location > 9:
+            self.write('ST '+ '%G' %9)
+            returnVal = 1
+        else:
+            self.write('ST '+ '%G' %9)
+            returnVal = -1
+        return returnVal
+
+    def storerecall_recallSettings(self, location = 0):
+        if 0 <= location <= 9:
+            self.write('ST '+ '%G' %location)
+            returnVal = 0
+        else:
+            self.write('ST '+ '%G' %0)
+            returnVal = -1
+        return returnVal
+# ------------------- SECTION STORE/RECALL END -------------------------- #
+
+
 
 
 
