@@ -261,6 +261,12 @@ class sr400:
         return returnVal
 # ----------------------- SECTION MODE END ------------------------------- #
 ##################
+
+
+
+
+
+
 # --------------------- SECTION LEVELS START ----------------------------- #
     def levels_triggerSlope(self, trigSlope = None): # CHECK THE DEFAULT!!!
         tSlopeDict = {'rise': 0, 'fall': 1}
@@ -311,7 +317,7 @@ class sr400:
                     returnVal = -1
                     
         else:
-            self.query('DS ' + str(discDict[disc])).rstrip()
+            self.query('DS ' + str(discDict['A'])).rstrip()
             returnVal = -1
             
         return returnVal
@@ -331,7 +337,7 @@ class sr400:
                     self.query('DM ' + str(discDict[disc])).rstrip()
                     returnVal = -1
         else:
-            self.query('DM ' + str(discDict[disc])).rstrip()
+            self.query('DM ' + str(discDict['A'])).rstrip()
             returnVal = -1
         
         return returnVal
@@ -356,7 +362,7 @@ class sr400:
                     self.query('DY ' + str(discDict[disc])).rstrip()
                     returnVal = -1
         else:
-            self.query('DY ' + str(discDict[disc])).rstrip()
+            self.query('DY ' + str(discDict['A'])).rstrip()
             returnVal = -1
             
         return returnVal
@@ -381,7 +387,7 @@ class sr400:
                     self.query('DL ' + str(discDict[disc])).rstrip()
                     returnVal = -1
         else:
-            self.query('DL ' + str(discDict[disc])).rstrip()
+            self.query('DL ' + str(discDict['A'])).rstrip()
             
         return returnVal
     
@@ -408,7 +414,7 @@ class sr400:
                     self.query('PM ' + str(portDict[port])).rstrip()
                     returnVal = -1
         else:
-            self.query('PM ' + str(portDict[port])).rstrip()
+            self.query('PM ' + str(portDict['port1'])).rstrip()
             returnVal = -1
             
         return returnVal
@@ -433,7 +439,7 @@ class sr400:
                     self.query('PY ' + str(portDict[port])).rstrip()
                     returnVal = -1
         else:
-            self.query('PY ' + str(portDict[port])).rstrip()
+            self.query('PY ' + str(portDict['port1'])).rstrip()
             returnVal = -1
             
         return returnVal
@@ -458,7 +464,7 @@ class sr400:
                     self.query('PL ' + str(portDict[port])).rstrip()
                     returnVal = -1
         else:
-            self.query('PL ' + str(portDict[port])).rstrip()
+            self.query('PL ' + str(portDict['port1'])).rstrip()
             returnVal = -1
             
         return returnVal
@@ -470,71 +476,86 @@ class sr400:
         else:
             returnVal = self.query('PZ ' + str(portDict['port1'])).rstrip()
         return returnVal
-
-
-
-
-
-
 # ----------------------- SECTION LEVELS END ----------------------------- #
 ##################
 # ----------------------- SECTION GATES START --------------------------- #
     def gates_gateMode(self, gate = 'A', gateMode = None):  # CHECK THE DEFAULT!!!
         gateDict = {'A': 1, 'B': 2}
         gateModeDict = {'cw': 0, 'fixed': 1, 'scan': 2}
-        if gateMode is None:
-            returnVal = self.query('GM ' + '%G' %gateDict[gate]).rstrip()
-        else:
-            if gateMode == 'cw' or gateMode == 'fixed' or gateMode == 'scan':
-                self.write('GM '+ '%G' %gateDict[gate] + ',' + 
-                           '%G' %gateModeDict[gateMode])
-                returnVal = 0
+        if gate in list(gateDict):
+            if gateMode is None:
+                returnVal = self.query('GM ' + str(gateDict[gate])).rstrip()
             else:
-                self.write('GM '+ '%G' %1)
-                returnVal = -1
+                if gateMode in list(gateModeDict):
+                    self.write('GM '+ str(gateDict[gate]) + ',' + 
+                               str(gateModeDict[gateMode]))
+                    returnVal = 0
+                else:
+                    self.query('GM ' + str(gateDict[gate])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('GM ' + str(gateDict['A'])).rstrip()
+            returnVal = -1
+        
         return returnVal
 
     def gates_gateScanStepSize(self, gate = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
         gateDict = {'A': 1, 'B': 2}
-        if stepSize is None:
-            returnVal = self.query('GY ' + '%G' %gateDict[port]).rstrip()
-        else:
-            if 0.0 <= stepSize <= 99.92E-3:
-                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %stepSize)
-                returnVal = 0
-            elif stepSize < 0.0:
-                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %0.0)
-                returnVal = -1
-            elif stepSize > 99.92E-3:
-                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %99.92E-3)
-                returnVal = -1
+        if gate in list(gateDict):
+            if stepSize is None:
+                returnVal = self.query('GY ' + str(gateDict[gate])).rstrip()
             else:
-                self.write('GY '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
-                returnVal = -1
+                if isinstance(stepSize, numbers.Number):
+                    if 0.0 <= stepSize <= 99.92E-3:
+                        self.write('GY '+ str(gateDict[gate]) + ',' +str(stepSize))
+                        returnVal = 0
+                    elif stepSize < 0.0:
+                        self.write('GY '+ str(gateDict[gate]) + ',' + str(0.0))
+                        returnVal = -1
+                    else:
+                        self.write('GY '+ str(gateDict[gate]) + ',' + str(99.92E-3))
+                        returnVal = -1
+                else:
+                    self.query('GY ' + str(gateDict[gate])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('GY ' + str(gateDict['A'])).rstrip()
+            returnVal = -1
+        
         return returnVal
 
     def gates_gateDelay(self, gate = 'A', gateDelay = None):  # CHECK THE DEFAULT!!!
         gateDict = {'A': 1, 'B': 2}
-        if stepSize is None:
-            returnVal = self.query('GD ' + '%G' %gateDict[gate]).rstrip()
-        else:
-            if 0.0 <= stepSize <= 999.2E-3:
-                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %gateDelay)
-                returnVal = 0
-            elif stepSize < 0.0:
-                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %0.0)
-                returnVal = -1
-            elif stepSize > 999.2E-3:
-                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %999.2E-3)
-                returnVal = -1
+        if gate in list(gateDict):
+            if gateDelay is None:
+                returnVal = self.query('GD ' + str(gateDict[gate])).rstrip()
             else:
-                self.write('GD '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
-                returnVal = -1
+                if isinstance(gateDelay, numbers.Number):
+                    if 0.0 <= gateDelay <= 999.2E-3:
+                        self.write('GD '+ str(gateDict[gate]) + ',' + str(gateDelay))
+                        returnVal = 0
+                    elif gateDelay < 0.0:
+                        self.write('GD '+ str(gateDict[gate]) + ',' + str(0.0))
+                        returnVal = -1
+                    else:
+                        self.write('GD '+ str(gateDict[gate]) + ',' + str(999.2E-3))
+                        returnVal = -1
+                else:
+                    self.query('GD ' + str(gateDict[gate])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('GD ' + str(gateDict[gate])).rstrip()
+            returnVal = -1
+            
         return returnVal
 
     def gates_delayPosition(self, gate = 'A'):
         gateDict = {'A': 1, 'B': 2}
-        return self.query('GZ ' + '%G' %gateDict[gate]).rstrip()
+        if gate in list(gateDict):
+            returnVal = self.query('GZ ' + str(gateDict[gate])).rstrip()
+        else:
+            returnVal = self.query('GZ ' + str(gateDict['A'])).rstrip()
+        return returnVal
 
     def gates_gateWidth(self, gate = 'A', gateWidth = None):  # CHECK THE DEFAULT!!!
         gateDict = {'A': 1, 'B': 2}
@@ -575,10 +596,10 @@ class sr400:
                       'reset': 7, 'left cursor': 8, 'up cursor': 9,
                       'mode': 10, 'agate': 11, 'bgate': 12, 'start': 13}
         if button in list(buttonDict):
-            self.write('CK '+ '%G' %buttonDict[button])
+            self.write('CK '+ str(buttonDict[button]))
             returnVal = 0
         else:
-            self.write('CK '+ '%G' %buttonDict['stop'])
+            self.write('CK '+ str(buttonDict['stop']))
             returnVal = -1
         return returnVal
 
@@ -591,15 +612,15 @@ class sr400:
     def frontPanel_modeInhibit(self, mode = 'local'):
         modeInhibDict = {0: 'local', 1: 'remote', 2: 'lock-out'}
         if mode in list(modeInhibDict):
-            self.write('MI '+ '%G' %modeInhibDict[mode])
+            self.write('MI '+ str(modeInhibDict[mode]))
             returnVal = 0
         else:
-            self.write('MI '+ '%G' %0)
+            self.write('MI '+ str(0))
             returnVal = -1
         return returnVal
 
     def frontPanel_messageString(self, mssg = None):
-        self.write('MS '+ '%G' %mssg)
+        self.write('MS '+ str(mssg))
         return 0
     
     def frontPanel_menuDisplay(self, select = 'count'):
@@ -620,11 +641,11 @@ class sr400:
                        'rs232-wait': [5,5], 'rs232-echo': [5,6], 'data': [5,7],
                        'lcd-contrast': [6,1], 'store': [6,2], 'recall': [6,3]}
         if select in list(displayDict):
-            self.write('MD '+ '%G' %displayDict[select][0] + ',' +
-                       '%G' %displayDict[select][1])
+            self.write('MD '+ str(displayDict[select][0]) + ',' +
+                       str(displayDict[select][1]))
             returnVal = 0
         else:
-            self.write('MD '+ '%G' %1 + ',' + '%G' %1)
+            self.write('MD '+ str(1) + ',' + str(1))
             returnVal = -1
         return returnVal
 
@@ -634,6 +655,22 @@ class sr400:
     def frontPanel_getMenuLine(self):
         return self.read('ML').rstrip()
 # ------------------- SECTION FRONT PANEL END --------------------------- #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##################
 # ------------------- SECTION INTERFACE START --------------------------- #
     def interface_fullReset(self):
