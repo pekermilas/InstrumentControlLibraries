@@ -23,6 +23,7 @@ Created on Thu Sep 25 08:35:50 2025
 
 import pyvisa as visa
 import os
+import numbers
 
 class sr400:
 
@@ -87,81 +88,107 @@ class sr400:
         modeDict = {'A,B': 0, 'A-B': 1, 'A+B': 2, 'A*B': 3}
         if mode is None:
             returnVal = self.query('CM').rstrip()
-        if mode in list(modeDict):
-            self.write('CM ' + '%G' %modeDict[mode])
-            returnVal = 0
         else:
-            self.write('CM ' + '%G' %0)
-            returnVal = -1
+            if mode in list(modeDict):
+                self.write('CM ' + str(modeDict[mode]))
+                returnVal = 0
+            else:
+                self.write('CM ' + str(0))
+                returnVal = -1
         return returnVal
 
     def mode_counterToInput(self, counter = 'A', counterInput = None):
         counterDict = {'A': 0, 'B': 1, 'T': 2}
-        if counterInput is None:
-            returnVal = self.query('CI '+ '%G' %counterDict[counter]).rstrip()
+        if counter in list(counterDict):
+            if counterInput is None:
+                returnVal = self.query('CI '+ str(counterDict[counter])).rstrip()
+            else:
+                if counter == 'A':
+                    if counterInput == 0 or counterInput == 1:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
+                        returnVal = 0
+                    else:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(0))
+                        returnVal = -1
+                if counter == 'B':
+                    if counterInput == 1 or counterInput == 2:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
+                        returnVal = 0
+                    else:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(1))
+                        returnVal = -1
+                if counter == 'T':
+                    if counterInput == 0 or counterInput == 2 or counterInput == 3:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
+                        returnVal = 0
+                    else:
+                        self.write('CI '+ str(counterDict[counter]) + ',' + str(0))
+                        returnVal = -1
         else:
-            if counter == 'A':
-                if counterInput == 0 or counterInput == 1:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
-                    returnVal = 0
-                else:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %0)
-                    returnVal = -1
-            if counter == 'B':
-                if counterInput == 1 or counterInput == 2:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
-                    returnVal = 0
-                else:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %1)
-                    returnVal = -1
-            if counter == 'T':
-                if counterInput == 0 or counterInput == 2 or counterInput == 3:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %counterInput)
-                    returnVal = 0
-                else:
-                    self.write('CI '+ '%G' %counterDict[counter] + ',' + '%G' %0)
-                    returnVal = -1
+            self.query('CI '+ str(counterDict['A'])).rstrip()
+            returnVal = -1
         return returnVal
         
     def mode_counterPreset(self, counter = 'B', counterPreset = None):
         # counterPreset is not ins seconds! It is number of cycles of 10MHz clock
         counterDict = {'B': 1, 'T': 2}
-        if counterPreset is None:
-            returnVal = self.query('CP '+ '%G' %counterDict[counter]).rstrip()
-        else:
-            if 1 <= counterPreset <= 9E11:
-                self.write('CP '+ '%G' %counterDict[counter] + ',' + '%G' %counterPreset)
-                returnVal = 0
+        if counter in list(counterDict):
+            if counterPreset is None:
+                returnVal = self.query('CP '+ str(counterDict[counter])).rstrip()
             else:
-                self.write('CP '+ '%G' %counterDict[counter] + ',' + '%G' %9E11)
-                returnVal = -1
+                if 1 <= counterPreset <= 9E11:
+                    self.write('CP '+ str(counterDict[counter]) + ',' + str(int(counterPreset)))
+                    returnVal = 0
+                elif counterPreset < 1:
+                    self.write('CP '+ str(counterDict[counter]) + ',' + str(1))
+                    returnVal = -1
+                elif counterPreset > 9E11:
+                    self.write('CP '+ str(counterDict[counter]) + ',' + str(9E11))
+                    returnVal = -1
+                else:
+                    self.query('CP '+ str(counterDict[counter])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('CP '+ str(counterDict['B'])).rstrip()
+            returnVal = -1
+
         return returnVal
         
-    def mode_scanPeriods(self, num = 0):
-        if num == 0:
+    def mode_scanPeriods(self, num = None):
+        if num is None:
             returnVal = self.query('NP').rstrip()
         else:
-            if 1 <= num <= 2000:
-                self.write('NP ' + str(num))
-                returnVal = 0
+            if isinstance(num, numbers.Number):
+                if 1 <= num <= 2000:
+                    self.write('NP ' + str(num))
+                    returnVal = 0
+                elif num < 1:
+                    self.write('NP ' + str(1))
+                    returnVal = -1
+                else:
+                    self.write('NP ' + str(2000))
+                    returnVal = -1
             else:
-                maxNum = 2000
-                self.write('NP ' + + '%G' %maxNum)
+                self.query('NP').rstrip()
                 returnVal = -1
         return returnVal
 
     def mode_scanPosition(self):
         return self.query('NN').rstrip()
 
-    def mode_scanEnd(self, scanMode = None):
+    def mode_scanEndMode(self, scanMode = None):
         if scanMode is None:
             returnVal = self.query('NE').rstrip()
         else:
-            if scanMode == 0 or scanMode == 1:
-                self.write('NE '+ '%G' %scanMode)
-                returnVal = 0
+            if isinstance(scanMode, numbers.Number):
+                if scanMode == 0 or scanMode == 1:
+                    self.write('NE '+ str(scanMode))
+                    returnVal = 0
+                else:
+                    self.write('NE '+ str(0))
+                    returnVal = -1
             else:
-                self.write('NE '+ '%G' %0)
+                self.query('NE').rstrip()
                 returnVal = -1
         return returnVal
 
@@ -169,19 +196,23 @@ class sr400:
         if dwellTime is None:
             returnVal = self.query('DT').rstrip()
         else:
-            if 2E-3 <= dwellTime <= 6E1:
-                self.write('DT ' + '%G' %dwellTime)
-                returnVal = 0
+            if isinstance(dwellTime, numbers.Number):
+                if 2E-3 <= dwellTime <= 6E1:
+                    self.write('DT ' + str(dwellTime))
+                    returnVal = 0
+                else:
+                    if dwellTime==0:
+                        self.write('DT ' + str(dwellTime))
+                        returnVal = 1
+                    elif dwellTime < 2E-3:
+                        self.write('DT ' + str(2E-3))
+                        returnVal = -1
+                    else:
+                        self.write('DT ' + str(6E1))
+                        returnVal = -1
             else:
-                if dwellTime==0:
-                    self.write('DT ' + '%G' %dwellTime)
-                    returnVal = 1
-                if dwellTime < 2E-3:
-                    self.write('DT ' + '%G' %2E-3)
-                    returnVal = -1
-                if dwellTime > 6E1:
-                    self.write('DT ' + '%G' %6E1)
-                    returnVal = -1
+                self.query('DT').rstrip()
+                returnVal = -1
         return returnVal
 
     def mode_analogSource(self, counter = None):
@@ -190,41 +221,42 @@ class sr400:
             returnVal = self.query('AS').rstrip()
         else:
             if counter in list(sourceDict):
-                self.write('AS ' + '%G' %sourceDict[counter])
+                self.write('AS ' + str(sourceDict[counter]))
                 returnVal = 0
             else:
-                self.write('AS ' + '%G' %0)
+                self.write('AS ' + str(0))
                 returnVal = -1
         return returnVal
 
-    def mode_analogOutputScale(self, outputScale = None): # CHECK THE DEFAULT!!!
+    def mode_analogOutputScale(self, outputScale = None):
         if outputScale is None:
             returnVal = self.query('AM').rstrip()
         else:
-            if outputScale < 0:
-                self.write('AM ' + '%G' %0)
-                returnVal = -1
-            elif outputScale > 7:
-                self.write('AM ' + '%G' %7)
-                returnVal = -1
-            elif 0 <= outputScale <= 7:
-                self.write('AM ' + '%G' %int(outputScale))
-                returnVal = 0
+            if isinstance(outputScale, numbers.Number):
+                if 0 <= outputScale <= 7:
+                    self.write('AM ' + str(int(outputScale)))
+                    returnVal = 0
+                elif outputScale < 0:
+                    self.write('AM ' + str(0))
+                    returnVal = -1
+                else:
+                    self.write('AM ' + str(7))
+                    returnVal = -1
             else:
-                self.write('AM ' + '%G' %0)
+                self.query('AM').rstrip()
                 returnVal = -1
         return returnVal
 
-    def mode_setDisplayMode(self, dispMode = None): # CHECK THE DEFAULT!!!
+    def mode_setDisplayMode(self, dispMode = None):
         dispModeDict = {'continuous': 0, 'hold': 1}
         if dispMode is None:
             returnVal = self.query('SD').rstrip()
         else:
-            if dispMode == 'continuous' or dispMode == 'hold':
-                self.write('SD '+ '%G' %dispModeDict[dispMode])
+            if dispMode in list(dispModeDict):
+                self.write('SD '+ str(dispModeDict[dispMode]))
                 returnVal = 0
             else:
-                self.write('SD '+ '%G' %0)
+                self.query('SD').rstrip()
                 returnVal = -1
         return returnVal
 # ----------------------- SECTION MODE END ------------------------------- #
