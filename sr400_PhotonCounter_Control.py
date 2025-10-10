@@ -267,11 +267,11 @@ class sr400:
         if trigSlope is None:
             returnVal = self.query('TS').rstrip()
         else:
-            if trigSlope == 'rise' or trigSlope == 'fall':
-                self.write('TS '+ '%G' %tSlopeDict[trigSlope])
+            if trigSlope in list(tSlopeDict):
+                self.write('TS '+ str(tSlopeDict[trigSlope]))
                 returnVal = 0
             else:
-                self.write('TS '+ '%G' %0)
+                self.query('TS').rstrip()
                 returnVal = -1
         return returnVal
 
@@ -279,148 +279,203 @@ class sr400:
         if trigLevel is None:
             returnVal = self.query('TL').rstrip()
         else:
-            if -2.0 <= trigLevel <= 2.0:
-                self.write('TL '+ '%G' %trigLevel)
-                returnVal = 0
-            elif trigLevel < -2.0:
-                self.write('TL '+ '%G' %-2.0)
-                returnVal = -1
-            elif trigLevel > 2.0:
-                self.write('TL '+ '%G' %2.0)
-                returnVal = -1
+            if isinstance(trigLevel, numbers.Number):
+                if -2.0 <= trigLevel <= 2.0:
+                    self.write('TL '+ str(trigLevel))
+                    returnVal = 0
+                elif trigLevel < -2.0:
+                    self.write('TL '+ str(-2.0))
+                    returnVal = -1
+                else:
+                    self.write('TL '+ str(2.0))
+                    returnVal = -1
             else:
-                self.write('TL '+ '%G' %0.1)
+                self.query('TL').rstrip()
                 returnVal = -1
+            
         return returnVal
 
     def levels_discriminatorSlope(self, disc = 'A', discSlope = None):  # CHECK THE DEFAULT!!!
         discDict = {'A': 0, 'B': 1, 'T':2}
         discSlopeDict = {'rise': 0, 'fall': 1}
-        if discSlope is None:
-            returnVal = self.query('DS ' + '%G' %discDict[disc]).rstrip()
-        else:
-            if discSlope == 'rise' or discSlope == 'fall':
-                self.write('DS '+ '%G' %discDict[disc] + ',' + 
-                           '%G' %discSlopeDict[discSlope])
-                returnVal = 0
+        if disc in list(discDict):
+            if discSlope is None:
+                returnVal = self.query('DS ' + str(discDict[disc])).rstrip()
             else:
-                self.write('DS '+ '%G' %0)
-                returnVal = -1
+                if discSlope in list(discSlopeDict):
+                    self.write('DS '+ str(discDict[disc]) + ',' + 
+                               str(discSlopeDict[discSlope]))
+                    returnVal = 0
+                else:
+                    self.query('DS ' + str(discDict[disc])).rstrip()
+                    returnVal = -1
+                    
+        else:
+            self.query('DS ' + str(discDict[disc])).rstrip()
+            returnVal = -1
+            
         return returnVal
 
     def levels_discriminatorMode(self, disc = 'A', discMode = None):  # CHECK THE DEFAULT!!!
         discDict = {'A': 0, 'B': 1, 'T':2}
         discModeDict = {'fixed': 0, 'scan': 1}
-        if discMode is None:
-            returnVal = self.query('DM ' + '%G' %discDict[disc]).rstrip()
-        else:
-            if discMode == 'fixed' or discMode == 'scan':
-                self.write('DM '+ '%G' %discDict[disc] + ',' + 
-                           '%G' %discModeDict[discSlope])
-                returnVal = 0
+        if disc in list(discDict):
+            if discMode is None:
+                returnVal = self.query('DM ' + str(discDict[disc])).rstrip()
             else:
-                self.write('DM '+ '%G' %0)
-                returnVal = -1
+                if discMode in list(discModeDict):
+                    self.write('DM '+ str(discDict[disc]) + ',' + 
+                               str(discModeDict[discMode]))
+                    returnVal = 0
+                else:
+                    self.query('DM ' + str(discDict[disc])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('DM ' + str(discDict[disc])).rstrip()
+            returnVal = -1
+        
         return returnVal
 
     def levels_discriminatorScanStepSize(self, disc = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
         discDict = {'A': 0, 'B': 1, 'T':2}    
-        if stepSize is None:
-            returnVal = self.query('DY ' + '%G' %discDict[disc]).rstrip()
-        else:
-            if -2.0 <= stepSize <= 2.0:
-                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %stepSize)
-                returnVal = 0
-            elif stepSize < -2.0:
-                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %-2.0)
-                returnVal = -1
-            elif stepSize > 2.0:
-                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %2.0)
-                returnVal = -1
+        if disc in list(discDict):
+            if stepSize is None:
+                returnVal = self.query('DY ' + str(discDict[disc])).rstrip()
             else:
-                self.write('DY '+ '%G' %discDict[disc] + ',' +'%G' %0.1)
-                returnVal = -1
+                if isinstance(stepSize, numbers.Number):
+                    if -2.0 <= stepSize <= 2.0:
+                        self.write('DY '+ str(discDict[disc]) + ',' + str(stepSize))
+                        returnVal = 0
+                    elif stepSize < -2.0:
+                        self.write('DY '+ str(discDict[disc]) + ',' + str(-2.0))
+                        returnVal = -1
+                    else:
+                        self.write('DY '+ str(discDict[disc]) + ',' + str(2.0))
+                        returnVal = -1
+                else:
+                    self.query('DY ' + str(discDict[disc])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('DY ' + str(discDict[disc])).rstrip()
+            returnVal = -1
+            
         return returnVal
 
     def levels_discriminatorLevel(self, disc = 'A', discLevel = None):  # CHECK THE DEFAULT!!!
         discDict = {'A': 0, 'B': 1, 'T':2}
-        if stepSize is None:
-            returnVal = self.query('DL ' + '%G' %discDict[disc]).rstrip()
-        else:
-            if -0.3 <= stepSize <= 0.3:
-                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %discLevel)
-                returnVal = 0
-            elif stepSize < -0.3:
-                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %-0.3)
-                returnVal = -1
-            elif stepSize > 0.3:
-                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %0.3)
-                returnVal = -1
+        if disc in list(discDict):
+            if discLevel is None:
+                returnVal = self.query('DL ' + str(discDict[disc])).rstrip()
             else:
-                self.write('DL '+ '%G' %discDict[disc] + ',' +'%G' %0.01)
-                returnVal = -1
+                if isinstance(discLevel, numbers.Number):
+                    if -0.3 <= discLevel <= 0.3:
+                        self.write('DL '+ str(discDict[disc]) + ',' + str(discLevel))
+                        returnVal = 0
+                    elif discLevel < -0.3:
+                        self.write('DL '+ str(discDict[disc]) + ',' + str(-0.3))
+                        returnVal = -1
+                    else:
+                        self.write('DL '+ str(discDict[disc]) + ',' + str(0.3))
+                        returnVal = -1
+                else:
+                    self.query('DL ' + str(discDict[disc])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('DL ' + str(discDict[disc])).rstrip()
+            
         return returnVal
     
     def levels_discriminatorLevelDuringScan(self, disc = 'A'):  # CHECK THE DEFAULT!!!
         discDict = {'A': 0, 'B': 1, 'T':2}
-        return self.query('DZ ' + '%G' %discDict[disc]).rstrip()
+        if disc in list(discDict):
+            returnVal = self.query('DZ ' + str(discDict[disc])).rstrip()
+        else:
+            returnVal = self.query('DZ ' + str(discDict['A'])).rstrip()
+        return returnVal
     
     def levels_rearPanelPortMode(self, port = 'port1', portMode = None):  # CHECK THE DEFAULT!!!
         portDict = {'port1': 1, 'port2': 2}
         portModeDict = {'fixed': 0, 'scan': 1}
-        if portMode is None:
-            returnVal = self.query('PM ' + '%G' %portDict[port]).rstrip()
-        else:
-            if portMode == 'fixed' or portMode == 'scan':
-                self.write('PM '+ '%G' %portDict[port] + ',' + 
-                           '%G' %portModeDict[portMode])
-                returnVal = 0
+        if port in list(portDict):
+            if portMode is None:
+                returnVal = self.query('PM ' + str(portDict[port])).rstrip()
             else:
-                self.write('PM '+ '%G' %0)
-                returnVal = -1
+                if portMode in list(portModeDict):
+                    self.write('PM '+ str(portDict[port]) + ',' + 
+                               str(portModeDict[portMode]))
+                    returnVal = 0
+                else:
+                    self.query('PM ' + str(portDict[port])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('PM ' + str(portDict[port])).rstrip()
+            returnVal = -1
+            
         return returnVal
     
     def levels_rearPanelPortScanStepSize(self, port = 'port1', stepSize = None):  # CHECK THE DEFAULT!!!
         portDict = {'port1': 1, 'port2': 2}
-        if stepSize is None:
-            returnVal = self.query('PY ' + '%G' %portDict[port]).rstrip()
-        else:
-            if -0.5 <= stepSize <= 0.5:
-                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %stepSize)
-                returnVal = 0
-            elif stepSize < -0.5:
-                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %-0.5)
-                returnVal = -1
-            elif stepSize > 0.5:
-                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %0.5)
-                returnVal = -1
+        if port in list(portDict):
+            if stepSize is None:
+                returnVal = self.query('PY ' + str(portDict[port])).rstrip()
             else:
-                self.write('PY '+ '%G' %portDict[port] + ',' +'%G' %0.1)
-                returnVal = -1
+                if isinstance(stepSize, numbers.Number):
+                    if -0.5 <= stepSize <= 0.5:
+                        self.write('PY '+ str(portDict[port]) + ',' + str(stepSize))
+                        returnVal = 0
+                    elif stepSize < -0.5:
+                        self.write('PY '+ str(portDict[port]) + ',' + str(-0.5))
+                        returnVal = -1
+                    else:
+                        self.write('PY '+ str(portDict[port]) + ',' + str(0.5))
+                        returnVal = -1
+                else:
+                    self.query('PY ' + str(portDict[port])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('PY ' + str(portDict[port])).rstrip()
+            returnVal = -1
+            
         return returnVal
 
     def levels_rearPanelPortOutputLevel(self, port = 'port1', voltLevel = None):  # CHECK THE DEFAULT!!!
         portDict = {'port1': 1, 'port2': 2}
-        if voltLevel is None:
-            returnVal = self.query('PL ' + '%G' %portDict[port]).rstrip()
-        else:
-            if -10.0 <= stepSize <= 10.0:
-                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %voltLevel)
-                returnVal = 0
-            elif stepSize < -10.0:
-                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %-10.0)
-                returnVal = -1
-            elif stepSize > 10.0:
-                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %10.0)
-                returnVal = -1
+        if port in list(portDict):
+            if voltLevel is None:
+                returnVal = self.query('PL ' + str(portDict[port])).rstrip()
             else:
-                self.write('PL '+ '%G' %portDict[port] + ',' +'%G' %0.1)
-                returnVal = -1
+                if isinstance(voltLevel, numbers.Number):
+                    if -10.0 <= voltLevel <= 10.0:
+                        self.write('PL '+ str(portDict[port]) + ',' + str(voltLevel))
+                        returnVal = 0
+                    elif voltLevel < -10.0:
+                        self.write('PL '+ str(portDict[port]) + ',' + str(-10.0))
+                        returnVal = -1
+                    else:
+                        self.write('PL '+ str(portDict[port]) + ',' + str(10.0))
+                        returnVal = -1
+                else:
+                    self.query('PL ' + str(portDict[port])).rstrip()
+                    returnVal = -1
+        else:
+            self.query('PL ' + str(portDict[port])).rstrip()
+            returnVal = -1
+            
         return returnVal
 
     def levels_rearPanelPortLevelDuringScan(self, port = 'port1'):  # CHECK THE DEFAULT!!!
-        portDict = portDict = {'port1': 1, 'port2': 2}
-        return self.query('PZ ' + '%G' %portDict[port]).rstrip()
+        portDict = {'port1': 1, 'port2': 2}
+        if port in list(portDict):
+            returnVal = self.query('PZ ' + str(portDict[port])).rstrip()
+        else:
+            returnVal = self.query('PZ ' + str(portDict['port1'])).rstrip()
+        return returnVal
+
+
+
+
+
+
 # ----------------------- SECTION LEVELS END ----------------------------- #
 ##################
 # ----------------------- SECTION GATES START --------------------------- #
