@@ -92,38 +92,63 @@ class sr400:
             if mode in list(modeDict):
                 self.write('CM ' + str(modeDict[mode]))
                 returnVal = 0
-            else:
+            elif mode == 'reset':
                 self.write('CM ' + str(0))
+                returnVal = 1
+            else:
+                self.query('CM').rstrip()
                 returnVal = -1
         return returnVal
 
     def mode_counterToInput(self, counter = 'A', counterInput = None):
         counterDict = {'A': 0, 'B': 1, 'T': 2}
+        inputDict = {'10MHz': 0, 'input1': 1, 'input2': 2, 'trig': 3}
         if counter in list(counterDict):
             if counterInput is None:
                 returnVal = self.query('CI '+ str(counterDict[counter])).rstrip()
+
             else:
-                if counter == 'A':
-                    if counterInput == 0 or counterInput == 1:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
-                        returnVal = 0
-                    else:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(0))
-                        returnVal = -1
-                if counter == 'B':
-                    if counterInput == 1 or counterInput == 2:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
-                        returnVal = 0
-                    else:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(1))
-                        returnVal = -1
-                if counter == 'T':
-                    if counterInput == 0 or counterInput == 2 or counterInput == 3:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(counterInput))
-                        returnVal = 0
-                    else:
-                        self.write('CI '+ str(counterDict[counter]) + ',' + str(0))
-                        returnVal = -1
+                if counterInput in list(inputDict):
+                    if counter == 'A':
+                        if counterInput == '10MHz' or counterInput == 'input1':
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict[counterInput]))
+                            returnVal = 0
+                        else:
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict['10MHz']))
+                            returnVal = -1
+                    if counter == 'B':
+                        if counterInput == 'input1' or counterInput == 'input2':
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict[counterInput]))
+                            returnVal = 0
+                        else:
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict['input1']))
+                            returnVal = -1
+                    if counter == 'T':
+                        if counterInput == '10MHz' or counterInput == 'input2' or counterInput == 'trig':
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict[counterInput]))
+                            returnVal = 0
+                        else:
+                            self.write('CI '+ str(counterDict[counter]) + ',' + 
+                                       str(inputDict['10MHz']))
+                            returnVal = -1
+                elif counterInput == 'reset':
+                    if counter == 'A':
+                        self.write('CI '+ str('A') + ',' + str(inputDict['input1']))
+                        returnVal = 1
+                    if counter == 'B':
+                        self.write('CI '+ str('B') + ',' + str(inputDict['input2']))
+                        returnVal = 1
+                    if counter == 'T':
+                        self.write('CI '+ str('T') + ',' + str(inputDict['10MHz']))
+                        returnVal = 1
+                else:
+                    self.query('CI '+ str(counterDict['A'])).rstrip()
+                    returnVal = -1
         else:
             self.query('CI '+ str(counterDict['A'])).rstrip()
             returnVal = -1
@@ -136,15 +161,22 @@ class sr400:
             if counterPreset is None:
                 returnVal = self.query('CP '+ str(counterDict[counter])).rstrip()
             else:
-                if 1 <= counterPreset <= 9E11:
-                    self.write('CP '+ str(counterDict[counter]) + ',' + str(int(counterPreset)))
-                    returnVal = 0
-                elif counterPreset < 1:
-                    self.write('CP '+ str(counterDict[counter]) + ',' + str(1))
-                    returnVal = -1
-                elif counterPreset > 9E11:
-                    self.write('CP '+ str(counterDict[counter]) + ',' + str(9E11))
-                    returnVal = -1
+                if isinstance(counterPreset, numbers.Number):
+                    if 1 <= counterPreset <= 9E11:
+                        self.write('CP '+ str(counterDict[counter]) + ',' + str(int(counterPreset)))
+                        returnVal = 0
+                    elif counterPreset < 1:
+                        self.write('CP '+ str(counterDict[counter]) + ',' + str(1))
+                        returnVal = -1
+                    else:
+                        self.write('CP '+ str(counterDict[counter]) + ',' + str(9E11))
+                        returnVal = -1
+                elif counterPreset == 'reset':
+                    if counter == 'B':
+                        self.write('CP '+ str(counterDict[counter]) + ',' + str(1E3))
+                    if counter == 'T':
+                        self.write('CP '+ str(counterDict[counter]) + ',' + str(1E7))
+                    returnVal = 1
                 else:
                     self.query('CP '+ str(counterDict[counter])).rstrip()
                     returnVal = -1
@@ -168,6 +200,9 @@ class sr400:
                 else:
                     self.write('NP ' + str(2000))
                     returnVal = -1
+            elif num == 'reset':
+                self.write('NP ' + str(2000))
+                returnVal = 1
             else:
                 self.query('NP').rstrip()
                 returnVal = -1
@@ -187,6 +222,9 @@ class sr400:
                 else:
                     self.write('NE '+ str(0))
                     returnVal = -1
+            elif scanMode == 'reset':
+                self.write('NE '+ str(0))
+                returnVal = 1
             else:
                 self.query('NE').rstrip()
                 returnVal = -1
@@ -210,9 +248,13 @@ class sr400:
                     else:
                         self.write('DT ' + str(6E1))
                         returnVal = -1
+            elif dwellTime == 'reset':
+                self.write('DT ' + str(1E0))
+                returnVal = 1
             else:
                 self.query('DT').rstrip()
                 returnVal = -1
+        
         return returnVal
 
     def mode_analogSource(self, counter = None):
@@ -223,9 +265,13 @@ class sr400:
             if counter in list(sourceDict):
                 self.write('AS ' + str(sourceDict[counter]))
                 returnVal = 0
-            else:
+            elif counter == 'reset':
                 self.write('AS ' + str(0))
+                returnVal = 1
+            else:
+                self.query('AS').rstrip()
                 returnVal = -1
+        
         return returnVal
 
     def mode_analogOutputScale(self, outputScale = None):
@@ -242,6 +288,9 @@ class sr400:
                 else:
                     self.write('AM ' + str(7))
                     returnVal = -1
+            elif outputScale == 'reset':
+                self.write('AM ' + str(0))
+                returnVal = 1
             else:
                 self.query('AM').rstrip()
                 returnVal = -1
@@ -255,20 +304,16 @@ class sr400:
             if dispMode in list(dispModeDict):
                 self.write('SD '+ str(dispModeDict[dispMode]))
                 returnVal = 0
+            elif dispMode== 'reset':
+                self.write('SD '+ str(dispModeDict['continuous']))
+                returnVal = 1
             else:
                 self.query('SD').rstrip()
                 returnVal = -1
         return returnVal
-# ----------------------- SECTION MODE END ------------------------------- #
-##################
-
-
-
-
-
 
 # --------------------- SECTION LEVELS START ----------------------------- #
-    def levels_triggerSlope(self, trigSlope = None): # CHECK THE DEFAULT!!!
+    def levels_triggerSlope(self, trigSlope = None):
         tSlopeDict = {'rise': 0, 'fall': 1}
         if trigSlope is None:
             returnVal = self.query('TS').rstrip()
@@ -276,12 +321,16 @@ class sr400:
             if trigSlope in list(tSlopeDict):
                 self.write('TS '+ str(tSlopeDict[trigSlope]))
                 returnVal = 0
+            elif trigSlope == 'reset':
+                self.write('TS '+ str(0))
+                returnVal = 1
             else:
                 self.query('TS').rstrip()
                 returnVal = -1
+
         return returnVal
 
-    def levels_triggerLevel(self, trigLevel = None): # CHECK THE DEFAULT!!!
+    def levels_triggerLevel(self, trigLevel = None):
         if trigLevel is None:
             returnVal = self.query('TL').rstrip()
         else:
@@ -295,13 +344,16 @@ class sr400:
                 else:
                     self.write('TL '+ str(2.0))
                     returnVal = -1
+            elif trigLevel == 'reset':
+                self.write('TL '+ str(2.0))
+                returnVal = 1
             else:
                 self.query('TL').rstrip()
                 returnVal = -1
             
         return returnVal
 
-    def levels_discriminatorSlope(self, disc = 'A', discSlope = None):  # CHECK THE DEFAULT!!!
+    def levels_discriminatorSlope(self, disc = 'A', discSlope = None):
         discDict = {'A': 0, 'B': 1, 'T':2}
         discSlopeDict = {'rise': 0, 'fall': 1}
         if disc in list(discDict):
@@ -312,6 +364,9 @@ class sr400:
                     self.write('DS '+ str(discDict[disc]) + ',' + 
                                str(discSlopeDict[discSlope]))
                     returnVal = 0
+                elif discSlope == 'reset':
+                    self.write('DS '+ str(discDict[disc]) + ',' + str(1))
+                    returnVal = 1
                 else:
                     self.query('DS ' + str(discDict[disc])).rstrip()
                     returnVal = -1
@@ -322,7 +377,7 @@ class sr400:
             
         return returnVal
 
-    def levels_discriminatorMode(self, disc = 'A', discMode = None):  # CHECK THE DEFAULT!!!
+    def levels_discriminatorMode(self, disc = 'A', discMode = None):
         discDict = {'A': 0, 'B': 1, 'T':2}
         discModeDict = {'fixed': 0, 'scan': 1}
         if disc in list(discDict):
@@ -333,6 +388,9 @@ class sr400:
                     self.write('DM '+ str(discDict[disc]) + ',' + 
                                str(discModeDict[discMode]))
                     returnVal = 0
+                elif discMode == 'reset':
+                    self.write('DM '+ str(discDict[disc]) + ',' + str(0))
+                    returnVal = 1
                 else:
                     self.query('DM ' + str(discDict[disc])).rstrip()
                     returnVal = -1
@@ -342,7 +400,7 @@ class sr400:
         
         return returnVal
 
-    def levels_discriminatorScanStepSize(self, disc = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
+    def levels_discriminatorScanStepSize(self, disc = 'A', stepSize = None):
         discDict = {'A': 0, 'B': 1, 'T':2}    
         if disc in list(discDict):
             if stepSize is None:
@@ -358,6 +416,9 @@ class sr400:
                     else:
                         self.write('DY '+ str(discDict[disc]) + ',' + str(2.0))
                         returnVal = -1
+                elif stepSize == 'reset':
+                    self.write('DY '+ str(discDict[disc]) + ',' + str(0.0))
+                    returnVal = 1
                 else:
                     self.query('DY ' + str(discDict[disc])).rstrip()
                     returnVal = -1
@@ -367,7 +428,7 @@ class sr400:
             
         return returnVal
 
-    def levels_discriminatorLevel(self, disc = 'A', discLevel = None):  # CHECK THE DEFAULT!!!
+    def levels_discriminatorLevel(self, disc = 'A', discLevel = None):
         discDict = {'A': 0, 'B': 1, 'T':2}
         if disc in list(discDict):
             if discLevel is None:
@@ -383,23 +444,28 @@ class sr400:
                     else:
                         self.write('DL '+ str(discDict[disc]) + ',' + str(0.3))
                         returnVal = -1
+                elif discLevel == 'reset':
+                    self.write('DL '+ str(discDict[disc]) + ',' + str(-0.01))
+                    returnVal = 1
                 else:
                     self.query('DL ' + str(discDict[disc])).rstrip()
                     returnVal = -1
         else:
             self.query('DL ' + str(discDict['A'])).rstrip()
+            returnVal = -1
             
         return returnVal
     
-    def levels_discriminatorLevelDuringScan(self, disc = 'A'):  # CHECK THE DEFAULT!!!
+    def levels_discriminatorLevelDuringScan(self, disc = 'A'):
         discDict = {'A': 0, 'B': 1, 'T':2}
         if disc in list(discDict):
             returnVal = self.query('DZ ' + str(discDict[disc])).rstrip()
         else:
             returnVal = self.query('DZ ' + str(discDict['A'])).rstrip()
+        
         return returnVal
     
-    def levels_rearPanelPortMode(self, port = 'port1', portMode = None):  # CHECK THE DEFAULT!!!
+    def levels_rearPanelPortMode(self, port = 'port1', portMode = None):
         portDict = {'port1': 1, 'port2': 2}
         portModeDict = {'fixed': 0, 'scan': 1}
         if port in list(portDict):
@@ -410,6 +476,9 @@ class sr400:
                     self.write('PM '+ str(portDict[port]) + ',' + 
                                str(portModeDict[portMode]))
                     returnVal = 0
+                elif portMode == 'reset':
+                    self.write('PM '+ str(portDict[port]) + ',' + str(0))
+                    returnVal = 1
                 else:
                     self.query('PM ' + str(portDict[port])).rstrip()
                     returnVal = -1
@@ -419,7 +488,7 @@ class sr400:
             
         return returnVal
     
-    def levels_rearPanelPortScanStepSize(self, port = 'port1', stepSize = None):  # CHECK THE DEFAULT!!!
+    def levels_rearPanelPortScanStepSize(self, port = 'port1', stepSize = None):
         portDict = {'port1': 1, 'port2': 2}
         if port in list(portDict):
             if stepSize is None:
@@ -435,6 +504,9 @@ class sr400:
                     else:
                         self.write('PY '+ str(portDict[port]) + ',' + str(0.5))
                         returnVal = -1
+                elif stepSize == 'reset':
+                    self.write('PY '+ str(portDict[port]) + ',' + str(0.0))
+                    returnVal = 1
                 else:
                     self.query('PY ' + str(portDict[port])).rstrip()
                     returnVal = -1
@@ -444,7 +516,7 @@ class sr400:
             
         return returnVal
 
-    def levels_rearPanelPortOutputLevel(self, port = 'port1', voltLevel = None):  # CHECK THE DEFAULT!!!
+    def levels_rearPanelPortOutputLevel(self, port = 'port1', voltLevel = None):
         portDict = {'port1': 1, 'port2': 2}
         if port in list(portDict):
             if voltLevel is None:
@@ -460,6 +532,9 @@ class sr400:
                     else:
                         self.write('PL '+ str(portDict[port]) + ',' + str(10.0))
                         returnVal = -1
+                elif voltLevel == 'reset':
+                    self.write('PL '+ str(portDict[port]) + ',' + str(0.0))
+                    returnVal = 1
                 else:
                     self.query('PL ' + str(portDict[port])).rstrip()
                     returnVal = -1
@@ -469,18 +544,18 @@ class sr400:
             
         return returnVal
 
-    def levels_rearPanelPortLevelDuringScan(self, port = 'port1'):  # CHECK THE DEFAULT!!!
+    def levels_rearPanelPortLevelDuringScan(self, port = 'port1'):
         portDict = {'port1': 1, 'port2': 2}
         if port in list(portDict):
             returnVal = self.query('PZ ' + str(portDict[port])).rstrip()
         else:
             returnVal = self.query('PZ ' + str(portDict['port1'])).rstrip()
+
         return returnVal
-# ----------------------- SECTION LEVELS END ----------------------------- #
-##################
+
 # ----------------------- SECTION GATES START --------------------------- #
-    def gates_gateMode(self, gate = 'A', gateMode = None):  # CHECK THE DEFAULT!!!
-        gateDict = {'A': 1, 'B': 2}
+    def gates_gateMode(self, gate = 'A', gateMode = None):
+        gateDict = {'A': 0, 'B': 1}
         gateModeDict = {'cw': 0, 'fixed': 1, 'scan': 2}
         if gate in list(gateDict):
             if gateMode is None:
@@ -490,6 +565,10 @@ class sr400:
                     self.write('GM '+ str(gateDict[gate]) + ',' + 
                                str(gateModeDict[gateMode]))
                     returnVal = 0
+                elif gateMode == 'reset':
+                    self.write('GM '+ str(gateDict[gate]) + ',' + 
+                               str(gateModeDict['cw']))
+                    returnVal = 1
                 else:
                     self.query('GM ' + str(gateDict[gate])).rstrip()
                     returnVal = -1
@@ -499,8 +578,8 @@ class sr400:
         
         return returnVal
 
-    def gates_gateScanStepSize(self, gate = 'A', stepSize = None):  # CHECK THE DEFAULT!!!
-        gateDict = {'A': 1, 'B': 2}
+    def gates_gateScanStepSize(self, gate = 'A', stepSize = None):
+        gateDict = {'A': 0, 'B': 1}
         if gate in list(gateDict):
             if stepSize is None:
                 returnVal = self.query('GY ' + str(gateDict[gate])).rstrip()
@@ -515,6 +594,9 @@ class sr400:
                     else:
                         self.write('GY '+ str(gateDict[gate]) + ',' + str(99.92E-3))
                         returnVal = -1
+                elif stepSize == 'reset':
+                    self.write('GY '+ str(gateDict[gate]) + ',' + str(0.00E-6))
+                    returnVal = 1
                 else:
                     self.query('GY ' + str(gateDict[gate])).rstrip()
                     returnVal = -1
@@ -524,8 +606,8 @@ class sr400:
         
         return returnVal
 
-    def gates_gateDelay(self, gate = 'A', gateDelay = None):  # CHECK THE DEFAULT!!!
-        gateDict = {'A': 1, 'B': 2}
+    def gates_gateDelay(self, gate = 'A', gateDelay = None):
+        gateDict = {'A': 0, 'B': 1}
         if gate in list(gateDict):
             if gateDelay is None:
                 returnVal = self.query('GD ' + str(gateDict[gate])).rstrip()
@@ -540,43 +622,48 @@ class sr400:
                     else:
                         self.write('GD '+ str(gateDict[gate]) + ',' + str(999.2E-3))
                         returnVal = -1
+                elif gateDelay == 'reset':
+                    self.write('GD '+ str(gateDict[gate]) + ',' + str(0.0E-6))
+                    returnVal = 1
                 else:
                     self.query('GD ' + str(gateDict[gate])).rstrip()
                     returnVal = -1
         else:
-            self.query('GD ' + str(gateDict[gate])).rstrip()
+            self.query('GD ' + str(gateDict['A'])).rstrip()
             returnVal = -1
             
         return returnVal
 
     def gates_delayPosition(self, gate = 'A'):
-        gateDict = {'A': 1, 'B': 2}
+        gateDict = {'A': 0, 'B': 1}
         if gate in list(gateDict):
             returnVal = self.query('GZ ' + str(gateDict[gate])).rstrip()
         else:
             returnVal = self.query('GZ ' + str(gateDict['A'])).rstrip()
         return returnVal
 
-    def gates_gateWidth(self, gate = 'A', gateWidth = None):  # CHECK THE DEFAULT!!!
-        gateDict = {'A': 1, 'B': 2}
+    def gates_gateWidth(self, gate = 'A', gateWidth = None):
+        gateDict = {'A': 0, 'B': 1}
         if gateWidth is None:
-            returnVal = self.query('GW ' + '%G' %gateDict[gate]).rstrip()
+            returnVal = self.query('GW ' + str(gateDict[gate])).rstrip()
         else:
-            if 0.005E-6 <= stepSize <= 999.2E-3:
-                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %stepSize)
-                returnVal = 0
-            elif stepSize < 0.005E-6:
-                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %0.005E-6)
-                returnVal = -1
-            elif stepSize > 999.2E-3:
-                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %999.2E-3)
-                returnVal = -1
+            if isinstance(gateWidth, numbers.Number):
+                if 0.005E-6 <= gateWidth <= 999.2E-3:
+                    self.write('GW '+ str(gateDict[gate]) + ',' + str(gateWidth))
+                    returnVal = 0
+                elif gateWidth < 0.005E-6:
+                    self.write('GW '+ str(gateDict[gate]) + ',' + str(0.005E-6))
+                    returnVal = -1
+                else:
+                    self.write('GW '+ str(gateDict[gate]) + ',' + str(999.2E-3))
+                    returnVal = -1
+            elif gateWidth == 'reset':
+                self.write('GW '+ str(gateDict[gate]) + ',' + str(0.005E-6))
             else:
-                self.write('GW '+ '%G' %gateDict[gate] + ',' +'%G' %0.1)
+                self.query('GW ' + str(gateDict['A'])).rstrip()
                 returnVal = -1
         return returnVal
-# ----------------------- SECTION GATES END ----------------------------- #
-##################
+
 # ------------------ SECTION FRONT PANEL START -------------------------- #
     def frontPanel_counterStart(self):
         self.write('CS')
@@ -620,7 +707,10 @@ class sr400:
         return returnVal
 
     def frontPanel_messageString(self, mssg = None):
-        self.write('MS '+ str(mssg))
+        if mssg == 'reset':
+            self.write('MS')
+        else:
+            self.write('MS '+ str(mssg))
         return 0
     
     def frontPanel_menuDisplay(self, select = 'count'):
@@ -650,28 +740,11 @@ class sr400:
         return returnVal
 
     def frontPanel_getMenuNumber(self):  # CHECK THE DEFAULT!!!
-        return self.read('MM').rstrip()
+        return self.query('MM').rstrip()
 
     def frontPanel_getMenuLine(self):
-        return self.read('ML').rstrip()
-# ------------------- SECTION FRONT PANEL END --------------------------- #
+        return self.query('ML').rstrip()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##################
 # ------------------- SECTION INTERFACE START --------------------------- #
     def interface_fullReset(self):
         self.write('CL')
@@ -688,11 +761,18 @@ class sr400:
         # 6 : Checks if SQR
         # 7 : Checks if command error
         if bit is None:
-            returnVal = self.query('SS').rstrip()
-        elif 0 <= bit <= 7:
-            returnVal = self.query('SS '+ '%G' %bit).rstrip()
+            returnVal = bin(int(self.query('SS').rstrip()))[2:]
         else:
-            returnVal = self.query('SS').rstrip()
+            if isinstance(bit, numbers.Number):
+                if 0 <= bit <= 7:
+                    returnVal = self.query('SS '+ str(bit)).rstrip()
+                elif bit > 7:
+                    returnVal = self.query('SS '+ str(7)).rstrip()
+                else:
+                    returnVal = self.query('SS '+ str(0)).rstrip()
+            else:
+                returnVal = bin(int(self.query('SS').rstrip()))[2:]
+        
         return returnVal
 
     def interface_readSecondaryStatusByte(self, bit = None):
@@ -701,27 +781,34 @@ class sr400:
         # 1 : Checks if inhibited
         # 2 : Checks if counting
         if bit is None:
-            returnVal = self.query('SI').rstrip()
-        elif 0 <= bit <= 2:
-            returnVal = self.query('SI '+ '%G' %bit).rstrip()
+            returnVal = bin(int(self.query('SI').rstrip()))[2:]
         else:
-            returnVal = self.query('SI').rstrip()
+            if isinstance(bit, numbers.Number):
+                if 0 <= bit <= 2:
+                    returnVal = self.query('SI '+ str(bit)).rstrip()
+                elif bit > 2:
+                    returnVal = self.query('SI '+ str(2)).rstrip()
+                else:
+                    returnVal = self.query('SI '+ str(0)).rstrip()
+            else:
+                returnVal = bin(int(self.query('SI').rstrip()))[2:]
+        
         return returnVal
 
-    def interface_gpibServiceRequest(self, value = None):  # CHECK THE DEFAULT!!!
+    def interface_gpibServiceRequest(self, value = None):
         if value is None:
             returnVal = self.query('SV').rstrip()
         elif 0 <= value <= 255:
-            returnVal = self.query('SV '+ '%G' %value).rstrip()
+            returnVal = self.query('SV '+ str(value)).rstrip()
         else:
             returnVal = self.query('SV').rstrip()
         return returnVal
 
-    def interface_rs232CharWaitInterval(self, multiples = None):  # CHECK THE DEFAULT!!!
+    def interface_rs232CharWaitInterval(self, multiples = None):
         if multiples is None:
             returnVal = self.query('SW').rstrip()
         elif 0 <= value <= 25:
-            returnVal = self.query('SW '+ '%G' %multiples).rstrip()
+            returnVal = self.query('SW '+ str(multiples)).rstrip()
         else:
             returnVal = self.query('SW').rstrip()
         return returnVal
@@ -731,76 +818,93 @@ class sr400:
             self.write('SE')
         elif codes[1] is None:
             j = codes[0] if 0 <= codes[0] <= 127 else 127
-            self.write('SE '+ '%G' %j)
+            self.write('SE '+ str(j))
         elif codes[2] is None:
             j = codes[0] if 0 <= codes[0] <= 127 else 127
             k = codes[1] if 0 <= codes[1] <= 127 else 127
-            self.write('SE '+ '%G' %j + ',' + '%G' %k)
+            self.write('SE '+ str(j) + ',' + str(k))
         elif codes[3] is None:
             j = codes[0] if 0 <= codes[0] <= 127 else 127
             k = codes[1] if 0 <= codes[1] <= 127 else 127
             l = codes[2] if 0 <= codes[2] <= 127 else 127
-            self.write('SE '+ '%G' %j + ',' + '%G' %k + ',' + 
-                       '%G' %l)
+            self.write('SE '+ str(j) + ',' + str(k) + ',' + str(l))
         else:
             j = codes[0] if 0 <= codes[0] <= 127 else 127
             k = codes[1] if 0 <= codes[1] <= 127 else 127
             l = codes[2] if 0 <= codes[2] <= 127 else 127
             m = codes[0] if 0 <= codes[3] <= 127 else 127
-            self.write('SE '+ '%G' %j + ',' + '%G' %k + ',' + 
-                       '%G' %l + ',' + '%G' %m)
+            self.write('SE '+ str(j) + ',' + str(k) + ',' + str(l) + ',' + str(m))
         return 0
-# -------------------- SECTION INTERFACE END ---------------------------- #
-##################
+
 # ------------------ SECTION STORE/RECALL START ------------------------- #
     def storerecall_storeSettings(self, location = 1):
-        if 1 <= location <= 9:
-            self.write('ST '+ '%G' %location)
-            returnVal = 0
-        elif location < 1:
-            self.write('ST '+ '%G' %1)
-            returnVal = 1
-        elif location > 9:
-            self.write('ST '+ '%G' %9)
-            returnVal = 1
+        if isinstance(location, numbers.Number):
+            if 1 <= location <= 9:
+                self.write('ST '+ str(location))
+                returnVal = 0
+            elif location < 1:
+                self.write('ST '+ str(1))
+                returnVal = 1
+            else:
+                self.write('ST '+ str(9))
+                returnVal = 1
         else:
-            self.write('ST '+ '%G' %9)
+            self.write('ST '+ str(9))
             returnVal = -1
+            
         return returnVal
 
     def storerecall_recallSettings(self, location = 0):
-        if 0 <= location <= 9:
-            self.write('ST '+ '%G' %location)
-            returnVal = 0
+        if isinstance(location, numbers.Number):
+            if 0 <= location <= 9:
+                self.write('RC '+ str(location))
+                returnVal = 0
+            elif location < 1:
+                self.write('RC '+ str(0))
+                returnVal = -1
+            else:
+                self.write('RC '+ str(9))
+                returnVal = -1
         else:
-            self.write('ST '+ '%G' %0)
+            self.write('RC '+ str(0))
             returnVal = -1
+            
         return returnVal
-# ------------------- SECTION STORE/RECALL END -------------------------- #
-##################
+
 # ---------------------- SECTION DATA START ----------------------------- #
-    def data_readCounterFinished(self, counter = 'A', scanPoint = None):   # CHECK THE DEFAULT!!!
+    def data_readCounterFinished(self, counter = 'A', scanPoint = None):
         if counter == 'A' or counter == 'B':
             if scanPoint is None:
                 returnVal = self.query('Q'+str(counter)).rstrip()
             else:
-                if 1 <= scanPoint <= 2000:
-                    returnVal = self.query('Q' + str(counter) + ' ' + str(m)).rstrip()
-                elif scanPoint < 1:
-                    returnVal = self.query('Q' + str(counter) + ' ' + str(1)).rstrip()
-                elif scanPoint > 2000:
-                    returnVal = self.query('Q' + str(counter) + ' ' + str(2000)).rstrip()
+                if isinstance(scanPoint, numbers.Number):
+                    if 1 <= scanPoint <= 2000:
+                        returnVal = self.query('Q' + str(counter) + ' ' + str(scanPoint)).rstrip()
+                    elif scanPoint < 1:
+                        returnVal = self.query('Q' + str(counter) + ' ' + str(1)).rstrip()
+                    else:
+                        returnVal = self.query('Q' + str(counter) + ' ' + str(2000)).rstrip()
                 else:
                     returnVal = self.query('Q'+str(counter)).rstrip()
         else:
             returnVal = self.query('QA').rstrip()
+        
         return returnVal
 
+    def data_dumpScanDataBuffers(self, counter = 'A'):
+        if counter == 'A' or counter == 'B' or counter == 'T':
+            returnVal = self.query('E'+str(counter)).rstrip()
+        else:
+            returnVal = self.query('EA').rstrip()
+    
+        return returnVal
+    
     def data_startNewScan(self, counter = 'A'):
         if counter == 'A' or counter == 'B' or counter == 'T':
             returnVal = self.query('F'+str(counter)).rstrip()
         else:
             returnVal = self.query('FA').rstrip()
+        
         return returnVal
     
     def data_readCounterNow(self, counter = 'A', scanPoint = None):
@@ -808,7 +912,7 @@ class sr400:
             returnVal = self.query('X'+str(counter)).rstrip()
         else:
             returnVal = self.query('XA').rstrip()
+        
         return returnVal
-# ----------------------- SECTION DATA END ------------------------------ #
 
 
