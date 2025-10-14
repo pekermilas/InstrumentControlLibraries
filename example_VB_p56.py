@@ -8,6 +8,7 @@ Created on Mon Oct 13 21:22:47 2025
 import pyvisa as visa
 import os
 import numbers
+import time
 
 import sr400_PhotonCounter_Control as sr400
 
@@ -16,12 +17,29 @@ import sr400_PhotonCounter_Control as sr400
 
 pcounter = sr400.sr400()
 pcounter.open()
-# pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
-pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
+pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
+# pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
 pcounter.frontPanel_counterReset()
-pcounter.mode_scanPeriods(num = 10)
+pcounter.mode_scanPeriods(num = 1)
 pcounter.frontPanel_counterStart()
-pcounter.data_dumpScanDataBuffers(counter = 'A')
+
+# for i in range(50):
+#     # print(pcounter.interface_readStatusByte(bit = 1))
+#     pcounter.interface_readStatusByte(bit = 1)
+#     time.sleep(0.2)
+
+while(not bool(int(pcounter.interface_readStatusByte(bit = 1)))):
+    pass
+
+print(pcounter.data_readCounterFinished(counter = 'A'))
+    
+# for i in range(1):
+#     while(not bool(int(pcounter.interface_readStatusByte(bit = 1)))):
+#         pass
+
+#     print(pcounter.data_readCounterNow(counter = 'A'))
+
+
 # pcounter.data_readCounterFinished(counter = 'A', scanPoint = 1)
 
 # For loop should wait before trying to print the data
