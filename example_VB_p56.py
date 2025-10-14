@@ -16,14 +16,18 @@ import sr400_PhotonCounter_Control as sr400
 
 pcounter = sr400.sr400()
 pcounter.open()
-pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
+# pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
+pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
 pcounter.frontPanel_counterReset()
+pcounter.mode_scanPeriods(num = 10)
 pcounter.frontPanel_counterStart()
-pcounter.data_readCounterFinished(counter = 'A', scanPoint = 1)
+pcounter.data_dumpScanDataBuffers(counter = 'A')
+# pcounter.data_readCounterFinished(counter = 'A', scanPoint = 1)
 
-for i in range(500):
-    
+# For loop should wait before trying to print the data
+# for i in range(10):
+    # print(pcounter.data_readCounterFinished(counter = 'A', scanPoint = i))
 
 
-counter.frontPanel_messageString('hello there!')
-counter.close()
+# pcounter.frontPanel_messageString('hello there!')
+pcounter.close()
