@@ -18,8 +18,8 @@ import sr400_PhotonCounter_Control as sr400
 pcounter = sr400.sr400()
 pcounter.open()
 # pcounter.interface_fullReset()
-# pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
-pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
+pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
+# pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
 pcounter.frontPanel_counterReset()
 # pcounter.mode_scanPeriods(num = 4)
 # pcounter.frontPanel_counterStart()
@@ -37,9 +37,9 @@ pcounter.frontPanel_counterReset()
 
 # pcounter.data_readCounterFinished(counter = 'A', scanPoint = 4)
 
-for i in range(100):
-    print(pcounter.query('FA'))
-
+# for i in range(2):
+#     print(pcounter.query('FA'))
+print(pcounter.query('FA'))
 
 # while(not bool(int(pcounter.interface_readStatusByte(bit = 1)))):
 #     pass
@@ -61,4 +61,12 @@ for i in range(100):
 
 
 # pcounter.frontPanel_messageString('hello there!')
+pcounter.frontPanel_modeInhibit()
+
+# pcounter.interface_fullReset()
+time.sleep(1)
 pcounter.close()
+
+
+# time.sleep(1)
+
