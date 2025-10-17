@@ -907,7 +907,7 @@ class sr400:
         
         return returnVal
     
-    def data_readCounterNow(self, counter = 'A', scanPoint = None):
+    def data_readCounterNow(self, counter = 'A'):
         if counter == 'A' or counter == 'B':
             returnVal = self.query('X'+str(counter)).rstrip()
         else:

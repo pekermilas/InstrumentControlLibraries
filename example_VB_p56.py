@@ -17,12 +17,42 @@ import sr400_PhotonCounter_Control as sr400
 
 pcounter = sr400.sr400()
 pcounter.open()
-# pcounter.interface_fullReset()
-pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
-# pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
+
+# pcounter.mode_counterToInput(counter = 'A', counterInput = '10MHz')
+pcounter.mode_counterToInput(counter = 'A', counterInput = 'input1')
 pcounter.frontPanel_counterReset()
-# pcounter.mode_scanPeriods(num = 4)
-# pcounter.frontPanel_counterStart()
+pcounter.mode_scanPeriods(num = 4)
+pcounter.frontPanel_counterStart()
+
+# for i in range(30):
+#     print(int(pcounter.interface_readStatusByte()))
+#     time.sleep(0.5)
+    
+# while(not int(pcounter.interface_readStatusByte())==110):
+#     pass
+# a = 0
+# while(True):
+#     if not int(pcounter.interface_readStatusByte())==110:
+#         continue
+#     else:
+#         break
+#     a = int(pcounter.query('QA'))
+# print(a)
+#     # continue
+# print(pcounter.interface_readStatusByte())
+# print(pcounter.data_readCounterFinished('A', scanPoint=2))
+# print(pcounter.data_readCounterNow())
+# print(pcounter.query('QA'))
+for i in range(4):
+    while(int(pcounter.data_readCounterFinished('A', scanPoint=i+1))<0):
+        pass
+    # print(pcounter.data_readCounterFinished('A', scanPoint=i+1))
+    print(pcounter.query('QA'+str(i+1)))
+
+
+
+
+
 
 # for i in range(50):
 #     # print(pcounter.interface_readStatusByte(bit = 1))
@@ -36,10 +66,8 @@ pcounter.frontPanel_counterReset()
 #     print(pcounter.data_readCounterFinished(counter = 'A' , scanPoint=i+1))
 
 # pcounter.data_readCounterFinished(counter = 'A', scanPoint = 4)
-
-# for i in range(2):
-#     print(pcounter.query('FA'))
-print(pcounter.query('FA'))
+# pcounter.data_dumpScanDataBuffers()
+# print(pcounter.query('FA'))
 
 # while(not bool(int(pcounter.interface_readStatusByte(bit = 1)))):
 #     pass
@@ -61,9 +89,9 @@ print(pcounter.query('FA'))
 
 
 # pcounter.frontPanel_messageString('hello there!')
-pcounter.frontPanel_modeInhibit()
+# pcounter.frontPanel_modeInhibit()
 
-# pcounter.interface_fullReset()
+pcounter.interface_fullReset()
 time.sleep(1)
 pcounter.close()
 
