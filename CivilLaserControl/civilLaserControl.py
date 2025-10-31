@@ -48,15 +48,12 @@ class civilLaser:
 
         return returnVal
 
-    def setLaserIndex(self, lColor = None):
-        if lColor is None:
-            self.laserIndex = 0
-        else:
-            self.laserIndex = lColor
+    def setLaser(self, lIndex = 0, lPower = 0):
+        self.laserIndex = lIndex
+        self.laserPower = lPower
         return 0
 
-    def getLaserIndex(self):
-        return self.laserIndex
+
 
     def setLaserPower(self, lPower = None):
         if lPower is None:
@@ -65,6 +62,9 @@ class civilLaser:
             self.laserPower = lPower
         return 0
 
+    def getLaserIndex(self):
+        return self.laserIndex
+    
     def getLaserPower(self):
         return self.laserPower
 
