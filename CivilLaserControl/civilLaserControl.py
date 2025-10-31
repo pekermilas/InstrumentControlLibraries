@@ -53,8 +53,6 @@ class civilLaser:
         self.laserPower = lPower
         return 0
 
-
-
     def setLaserPower(self, lPower = None):
         if lPower is None:
             self.laserPower = 0
