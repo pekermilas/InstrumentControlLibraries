@@ -55,12 +55,18 @@ class civilLaser:
             self.laserIndex = lColor
         return 0
 
+    def getLaserIndex(self):
+        return self.laserIndex
+
     def setLaserPower(self, lPower = None):
         if lPower is None:
             self.laserPower = 0
         else:
             self.laserPower = lPower
         return 0
+
+    def getLaserPower(self):
+        return self.laserPower
 
     def runLaser(self):
         if not self.dev is None:
