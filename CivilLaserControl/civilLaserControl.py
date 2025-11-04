@@ -8,6 +8,7 @@ This is a temporary script file.
 import serial
 import serial.tools.list_ports
 import time
+import numpy as np
 
 class civilLaser:
     def __init__(self, port = None):
@@ -16,10 +17,9 @@ class civilLaser:
         self.baudrate = 9600
         self.dsrdtr = True
         self.dev = None
-        self.onoff = False
         self.timeout = None
         self.laserIndex = 0
-        self.laserPower = 0
+        self.laserPower = np.zeros(3)
         
     def open(self):
         if self.dev is None:
@@ -48,43 +48,30 @@ class civilLaser:
 
         return returnVal
 
-    def setLaser(self, lIndex = 0, lPower = 0):
-        self.laserIndex = lIndex
-        self.laserPower = lPower
-        return 0
-
     def setLaserPower(self, lPower = None):
         if lPower is None:
-            self.laserPower = 0
+            self.laserPower = np.zeros(3)
         else:
             self.laserPower = lPower
         return 0
 
-    def getLaserIndex(self):
-        return self.laserIndex
-    
     def getLaserPower(self):
         return self.laserPower
 
     def runLaser(self):
         if not self.dev is None:
-            msgString = str(self.laserIndex)+','+str(self.laserPower)
+            msgString = str(self.laserPower[0])+','+str(self.laserPower[1])+','+str(self.laserPower[2])
+                        
             self.dev.write(msgString.encode())
         
             while(self.dev.inWaiting()==0):
                 pass
             temp = int(self.dev.readline().decode('utf-8').strip())
             
-            if int(temp) == self.laserIndex:
+            if int(temp) == 0:
                 returnVal = 0
             else:
                 returnVal = -1
-                
-            if self.laserPower>0: 
-                self.onoff = True
-            else:
-                self.onoff = False
-        
         else:
             print("Nothing to do!")
             returnVal = 1
