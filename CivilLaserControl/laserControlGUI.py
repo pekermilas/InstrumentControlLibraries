@@ -74,11 +74,12 @@ def laserRun():
     global laserState
     print(laserPower)
     laserState = [1 if int(i)>0 else 0 for i in laserPower]
+    laser.laserPower = laserPower
     if sum(laserState)==0:
         laserButton.config(image=off)
     else:
         laserButton.config(image=on)
-
+        
     laser.runLaser()
     return 0
 
