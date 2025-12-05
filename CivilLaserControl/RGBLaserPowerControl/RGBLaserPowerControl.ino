@@ -29,14 +29,12 @@ void setup(){
 void loop(){
   while (Serial.available() == 0) {}
   String temp = Serial.readString();
-  int laserColor = getValue(temp,',',0).toInt();
-  int laserPower = getValue(temp,',',1).toInt();
-  int laserPin = 0;
+  int redPower = getValue(temp,',',0).toInt();
+  int greenPower = getValue(temp,',',1).toInt();
+  int bluePower = getValue(temp,',',2).toInt();
 
-  if (laserColor==0) laserPin = red;
-  if (laserColor==1) laserPin = green;
-  if (laserColor==2) laserPin = blue;
-
-  analogWrite(laserPin, laserPower);
-  Serial.println(laserColor);
+  analogWrite(red, redPower);
+  analogWrite(green, greenPower);
+  analogWrite(blue, bluePower);
+  Serial.println(0);
 }
