@@ -22,7 +22,8 @@ class sdg6022X:
         self.dev = None
         self.visaLib = 'ni-visa' # or 'py-visa'
         self.rm = None
-            
+
+# ----------------------- SECTION CORE ------------------------------- #    
     def open(self):
         if self.dev is None:
             if self.visaLib == 'py-visa':
@@ -70,10 +71,10 @@ class sdg6022X:
         if not self.dev is None:
             return self.dev.query(queryStr)
     
-# ----------------------- SECTION DEVICE SETTINGS ------------------------------- #    
-    def resetDevice(self):
+# ----------------------- SECTION SYSTEM ------------------------------- #    
+    def systemID(self):
         if not self.dev is None:
-            returnVal = self.write('*RST')
+            returnVal = self.query('*IDN')
         else:
             returnVal = -1
         return returnVal
@@ -85,18 +86,25 @@ class sdg6022X:
             returnVal = -1
         return returnVal
 
-    def setPortState(self, port="C1", output="OFF", 
+    def resetDevice(self):
+        if not self.dev is None:
+            returnVal = self.write('*RST')
+        else:
+            returnVal = -1
+        return returnVal
+
+# ----------------------- SECTION SIGNAL ------------------------------- #    
+    def setOutputState(self, port="C1", output="OFF", 
                      load="HiZ", polarity="NOR"):
         if not self.dev is None:
-            inputString = port + ":OUTP " + output + ",LOAD," + load + 
-            ",PLRT," + polarity
+            inputString = port + ":OUTP " + output + ",LOAD," + load + ",PLRT," + polarity
             self.write(inputString)
             returnVal = 1
         else:
             returnVal = -1
         return returnVal
 
-    def getPortState(self, port="C1"):
+    def getOutputState(self, port="C1"):
         if not self.dev is None:
             returnVal = self.query(port+":OUTP?")
         else:
