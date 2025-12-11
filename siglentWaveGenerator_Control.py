@@ -283,13 +283,129 @@ class sdg6022X:
             returnVal = -1
         return returnVal
     
-    def setWaveModulationParams(self, port="C1", modType=None, modState=None,
+    def setWaveModulationParams(self, port="C1", modType="AM", modState=None,
                                 modSrcType=None, modWvShape=None, modFreq=None,
                                 modDepth=None, modDev=None, modKeyFreq=None,
-                                modHopFreq=None, modPhse=None, modAmpl=None,
-                                modOfst=None, modSymm=None, modDuty=None):
+                                modHopFreq=None, modCarrShape=None, modCarrFreq=None,
+                                modCarrPhse=None, modCarrAmpl=None, modCarrOfst=None, 
+                                modCarrSymm=None, modCarrDuty=None, modCarrRise=None,
+                                modCarrFall=None):
         if not self.dev is None:
-            returnVal = 0
+            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
+                modType=="PM" or modType=="PWM" or modType=="ASK" or
+                modType=="FSK" or modType=="PSK" or modType=="CARR"):
+                inputString = port + ":MDWV " + str(modType)
+                if not modState is None:
+                    inputString = inputString + ",STATE," + str(modState)
+                else:
+                    print("Missing Parameter: mod state in ON/OFF")
+
+            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
+                modType=="PM" or modType=="PWM" or modType=="ASK" or
+                modType=="FSK" or modType=="PSK"):
+                if not modSrcType is None:
+                    inputString = inputString + ",SRC," + str(modSrcType)
+                else:
+                    print("Missing Parameter: mod source type in INT/EXT")
+                
+            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
+                modType=="PM" or modType=="PWM"):
+                if modSrcType=="INT":
+                    if not modWvShape is None:
+                        if (modWvShape=="SINE" or modWvShape=="SQUARE" or
+                            modWvShape=="TRIANGLE" or modWvShape=="UPRAMP" or
+                            modWvShape=="DNRAMP" or modWvShape=="NOISE" or 
+                            modWvShape=="ARB"):
+                            inputString = inputString + ",MDSP," + str(modWvShape)
+                        else:
+                            print("Unknown source shape")
+                    else:
+                        print("Missing Parameter: mod source shape (SINE, SQUARE, etc.)")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
+                modType=="PM" or modType=="PWM", modType=="CARR"):
+                if modSrcType=="INT":
+                    if not modFreq is None:
+                        inputString = inputString + ",FRQ," + str(modFreq)
+                    else:
+                        print("Missing Parameter: mod source frequency in Hz")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="AM"):
+                if modSrcType=="INT":
+                    if not modDepth is None:
+                        inputString = inputString + ",DEPTH," + str(modDepth)
+                    else:
+                        print("Missing Parameter: mod depth in percentage")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="FM" or modType=="PM" or modType=="PWM"):
+                if modSrcType=="INT":
+                    if not modDev is None:
+                        inputString = inputString + ",DEVI," + str(modDev)
+                    else:
+                        print("Missing Parameter: mod deviation in Hz")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="ASK" or modType=="FSK" or modType=="PSK"):
+                if modSrcType=="INT":
+                    if not modKeyFreq is None:
+                        inputString = inputString + ",KFRQ," + str(modKeyFreq)
+                    else:
+                        print("Missing Parameter: mod key frequency in Hz")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="FSK"):
+                if modSrcType=="INT":
+                    if not modHopFreq is None:
+                        inputString = inputString + ",HFRQ," + str(modHopFreq)
+                    else:
+                        print("Missing Parameter: mod hop frequency in Hz")
+                else:
+                    print("Mode source type is not INT")
+
+            if (modType=="CARR"):
+                if modSrcType=="INT":
+                    if not modHopFreq is None:
+                        inputString = inputString + ",HFRQ," + str(modHopFreq)
+                    else:
+                        print("Missing Parameter: mod hop frequency in Hz")
+                else:
+                    print("Mode source type is not INT")
+
+
+
+
+
+
+
+
+
+
+
+
+            
+            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
+                modType=="PM" or modType=="PWM" or modType=="ASK" or
+                modType=="FSK" or modType=="PSK"):
+                
+                inputString = port + ":BSWV WVTP," + str(shape)
+                if not freq is None:
+                    inputString = inputString + ",FRQ," + str(freq) # In Hz
+                    period = None
+                if not period is None:
+                    inputString = inputString + ",PERI," + str(period) # In s
+                    freq = None
+                    
+                    
+                    
+                    
         else:
             returnVal = 1
         return returnVal
