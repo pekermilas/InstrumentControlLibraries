@@ -128,10 +128,11 @@ class sdg6022X:
                            bandwidth=None, length=None, edge=None, 
                            diffstate=None, bitrate=None):
         missingPar = 0
+        inputString = port + ":BSWV WVTP,"
         if not self.dev is None:
             if (shape=="SINE" or shape=="SQUARE" or shape=="RAMP" or 
                 shape=="PULSE" or shape=="ARB" or shape=="PRBS"):
-                inputString = port + ":BSWV WVTP," + str(shape)
+                inputString = inputString + str(shape)
                 if not freq is None:
                     inputString = inputString + ",FRQ," + str(freq) # In Hz
                     period = None
@@ -289,16 +290,21 @@ class sdg6022X:
                                 modHopFreq=None, modCarrShape=None, modCarrFreq=None,
                                 modCarrPhse=None, modCarrAmpl=None, modCarrOfst=None, 
                                 modCarrSymm=None, modCarrDuty=None, modCarrRise=None,
-                                modCarrFall=None):
+                                modCarrFall=None, modCarrDelay=None):
+        missingPar = 0
+        inputString = port + ":MDWV "
         if not self.dev is None:
             if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
                 modType=="PM" or modType=="PWM" or modType=="ASK" or
                 modType=="FSK" or modType=="PSK" or modType=="CARR"):
-                inputString = port + ":MDWV " + str(modType)
+                
+                inputString = inputString + str(modType)
+                
                 if not modState is None:
                     inputString = inputString + ",STATE," + str(modState)
                 else:
                     print("Missing Parameter: mod state in ON/OFF")
+                    missingPar+=1
 
             if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
                 modType=="PM" or modType=="PWM" or modType=="ASK" or
@@ -307,6 +313,7 @@ class sdg6022X:
                     inputString = inputString + ",SRC," + str(modSrcType)
                 else:
                     print("Missing Parameter: mod source type in INT/EXT")
+                    missingPar+=1
                 
             if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
                 modType=="PM" or modType=="PWM"):
@@ -319,8 +326,10 @@ class sdg6022X:
                             inputString = inputString + ",MDSP," + str(modWvShape)
                         else:
                             print("Unknown source shape")
+                            missingPar+=1
                     else:
                         print("Missing Parameter: mod source shape (SINE, SQUARE, etc.)")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
 
@@ -331,6 +340,7 @@ class sdg6022X:
                         inputString = inputString + ",FRQ," + str(modFreq)
                     else:
                         print("Missing Parameter: mod source frequency in Hz")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
 
@@ -340,6 +350,7 @@ class sdg6022X:
                         inputString = inputString + ",DEPTH," + str(modDepth)
                     else:
                         print("Missing Parameter: mod depth in percentage")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
 
@@ -349,6 +360,7 @@ class sdg6022X:
                         inputString = inputString + ",DEVI," + str(modDev)
                     else:
                         print("Missing Parameter: mod deviation in Hz")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
 
@@ -358,8 +370,10 @@ class sdg6022X:
                         inputString = inputString + ",KFRQ," + str(modKeyFreq)
                     else:
                         print("Missing Parameter: mod key frequency in Hz")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
+                    missingPar+=1
 
             if (modType=="FSK"):
                 if modSrcType=="INT":
@@ -367,62 +381,250 @@ class sdg6022X:
                         inputString = inputString + ",HFRQ," + str(modHopFreq)
                     else:
                         print("Missing Parameter: mod hop frequency in Hz")
+                        missingPar+=1
                 else:
                     print("Mode source type is not INT")
 
             if (modType=="CARR"):
-                if modSrcType=="INT":
-                    if not modHopFreq is None:
-                        inputString = inputString + ",HFRQ," + str(modHopFreq)
+                if not modCarrShape is None:
+                    if (modCarrShape=="SINE" or modCarrShape=="SQUARE" or 
+                        modCarrShape=="RAMP" or modCarrShape=="ARB"  or 
+                        modCarrShape=="PULSE"):
+                        inputString = inputString + ",WVTP," + str(modCarrShape)
                     else:
-                        print("Missing Parameter: mod hop frequency in Hz")
+                        print("Unknown carrier modulation wave shape")
+                        missingPar+=1
                 else:
-                    print("Mode source type is not INT")
+                    print("Missing Parameter: carrier mod wave shape")
+                    missingPar+=1
 
+            if (modType=="CARR"):
+                if not modCarrFreq is None:
+                    inputString = inputString + ",FRQ," + str(modCarrFreq)
+                else:
+                    print("Missing Parameter: carrier mod wave freq in Hz")
+                    missingPar+=1
 
+            if (modType=="CARR"):
+                if not modCarrPhse is None:
+                    inputString = inputString + ",PHSE," + str(modCarrPhse)
+                else:
+                    print("Missing Parameter: carrier mod wave phase in degrees")
+                    missingPar+=1
 
-
-
-
-
-
-
-
-
-
+            if (modType=="CARR"):
+                if not modCarrAmpl is None:
+                    inputString = inputString + ",AMP," + str(modCarrAmpl)
+                else:
+                    print("Missing Parameter: carrier mod wave amplitude in V")
+                    missingPar+=1
             
-            if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
-                modType=="PM" or modType=="PWM" or modType=="ASK" or
-                modType=="FSK" or modType=="PSK"):
-                
-                inputString = port + ":BSWV WVTP," + str(shape)
-                if not freq is None:
-                    inputString = inputString + ",FRQ," + str(freq) # In Hz
-                    period = None
-                if not period is None:
-                    inputString = inputString + ",PERI," + str(period) # In s
-                    freq = None
-                    
-                    
-                    
-                    
+            if (modType=="CARR"):
+                if not modCarrOfst is None:
+                    inputString = inputString + ",OFST," + str(modCarrOfst)
+                else:
+                    print("Missing Parameter: carrier mod wave offset in V")
+                    missingPar+=1
+
+            if (modType=="CARR"):
+                if modCarrShape=="RAMP":
+                    if not modCarrSymm is None:
+                        inputString = inputString + ",SYM," + str(modCarrSymm)
+                    else:
+                        print("Missing Parameter: carrier mod wave symmetry in percentage")
+                        missingPar+=1
+                else:
+                    print("Mode carrier shape is not RAMP")
+
+            if (modType=="CARR"):
+                if (modCarrShape=="SQUARE" or modCarrShape=="PULSE"):
+                    if not modCarrDuty is None:
+                        inputString = inputString + ",DUTY," + str(modCarrDuty)
+                    else:
+                        print("Missing Parameter: carrier mod wave duty cycle in percentage")
+                        missingPar+=1
+                else:
+                    print("Mode carrier shape is not SQUARE or PULSE")
+
+            if (modType=="CARR"):
+                if modCarrShape=="PULSE":
+                    if not modCarrRise is None:
+                        inputString = inputString + ",RISE," + str(modCarrRise)
+                    else:
+                        print("Missing Parameter: carrier mod wave rise time in seconds")
+                        missingPar+=1
+                    if not modCarrFall is None:
+                        inputString = inputString + ",FALL," + str(modCarrFall)
+                    else:
+                        print("Missing Parameter: carrier mod wave fall time in seconds")
+                        missingPar+=1
+                    if not modCarrDelay is None:
+                        inputString = inputString + ",DLY," + str(modCarrDelay)
+                    else:
+                        print("Missing Parameter: carrier mod wave delay time in seconds")
+                        missingPar+=1
+                else:
+                    print("Mode carrier shape is not PULSE")
+        else:
+            missingPar+=1
+        
+        if missingPar>0:
+            returnVal = -1
         else:
             returnVal = 1
+            self.write(inputString)
+        
+        return returnVal
+
+    def getWaveModulationParams(self, port="C1"):
+        if not self.dev is None:
+            returnVal = self.query(port+":MDWV?")
+        else:
+            returnVal = -1
         return returnVal
     
+    def setSweepWaveParams(self, port="C1", swpdState=None, swpTime=None, 
+                           swpStartFrq=None, swpStopFrq=None, swpMode=None,
+                           swpDir=None, swpTrigSrc=None, swpManTrig=None,
+                           swpTrigOut=None, swpTrigEdge=None, swpCarrWvTyp=None,
+                           swpCarrFrq=None, swpCarrPhse=None, swpCarrAmpl=None,
+                           swpCarrOfst=None, swpCarrSymm=None, swpCarrDuty=None):
+        missingPar = 0
+        inputString = port + ":SWWV "
+        if not self.dev is None:
+            if not swpState is None:
+                inputString = inputString + ",STATE," + str(swpState)
+            else:
+                print("Missing Parameter: sweep state in ON/OFF")
+                missingPar+=1
+            if not swpTime is None:
+                inputString = inputString + ",TIME," + str(swpTime)
+            else:
+                print("Missing Parameter: sweep time in seconds")
+                missingPar+=1
+            if not swpStartFrq is None:
+                inputString = inputString + ",START," + str(swpStartFrq)
+            else:
+                print("Missing Parameter: sweep start frequency in Hz")
+                missingPar+=1
+            if not swpStopFrq is None:
+                inputString = inputString + ",STOP," + str(swpStopFrq)
+            else:
+                print("Missing Parameter: sweep stop frequency in Hz")
+                missingPar+=1
+            if not swpMode is None:
+                inputString = inputString + ",SWMD," + str(swpMode)
+            else:
+                print("Missing Parameter: sweep mode in LINE or LOG")
+                missingPar+=1
+            if not swpDir is None:
+                inputString = inputString + ",DIR," + str(swpDir)
+            else:
+                print("Missing Parameter: sweep direction in UP or DOWN")
+                missingPar+=1
+            if not swpTrigSrc is None:
+                inputString = inputString + ",TRSR," + str(swpTrigSrc)
+            else:
+                print("Missing Parameter: trigger source in EXT or INT or MAN")
+                missingPar+=1
+
+            # if (swpTrigSrc=="MAN"):
+            #     if not swpManTrig is None:
+            #         inputString = inputString + ",MTRIG," + str(swpManTrig)
+            # else:
+            #     print("Missing Parameter: trigger ???")
+            #     missingPar+=1
+
+            if (swpTrigSrc=="EXT" or swpTrigSrc=="MAN"):
+                if not swpTrigEdge is None:
+                    inputString = inputString + ",EDGE," + str(swpTrigEdge)
+                else:
+                    print("Missing Parameter: trigger edge in RISE or FALL")
+                    missingPar+=1                
+
+            if not swpCarrWvTyp is None:
+                if (swpCarrWvTyp=="SINE" or swpCarrWvTyp=="SQUARE" or
+                    swpCarrWvTyp=="RAMP" or swpCarrWvTyp=="ARB"):
+                        inputString = inputString + ",CARRY," + str(swpCarrWvTyp)
+                else:
+                    print("Unknown sweeper carrier wave type")
+                    missingPar+=1
+                if not swpCarrFrq is None:
+                    inputString = inputString + ",FRQ," + str(swpCarrFrq)
+                else:
+                    print("Missing Parameter: sweeper carrier wave frequency in Hz")
+                    missingPar+=1
+                if not swpCarrPhse is None:
+                    inputString = inputString + ",PHSE," + str(swpCarrPhse)
+                else:
+                    print("Missing Parameter: sweeper carrier wave phase in degrees")
+                    missingPar+=1
+                if not swpCarrAmpl is None:
+                    inputString = inputString + ",AMP," + str(swpCarrAmpl)
+                else:
+                    print("Missing Parameter: sweeper carrier wave amplitude in V")
+                    missingPar+=1
+                if not swpCarrOfst is None:
+                    inputString = inputString + ",OFST," + str(swpCarrOfst)
+                else:
+                    print("Missing Parameter: sweeper carrier wave offset in V")
+                    missingPar+=1
+                if swpCarrWvTyp=="RAMP":
+                    if not swpCarrSymm is None:
+                        inputString = inputString + ",SYM," + str(swpCarrSymm)
+                    else:
+                        print("Missing Parameter: sweeper carrier wave symmetry in percentage")
+                        missingPar+=1
+                if swpCarrWvTyp=="SQUARE":
+                    if not swpCarrDuty is None:
+                        inputString = inputString + ",DUTY," + str(swpCarrDuty)
+                    else:
+                        print("Missing Parameter: sweeper carrier wave duty cycle in percentage")
+                        missingPar+=1
+            else:
+                print("Missing Parameter: sweeper carrier wave type")
+                missingPar+=1
+        else:
+            missingPar+=1
+        
+        if missingPar>0:
+            returnVal = -1
+        else:
+            returnVal = 1
+            self.write(inputString)
+        
+        return returnVal
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    def getSweepWaveParams(self, port="C1"):
+        if not self.dev is None:
+            returnVal = self.query(port+":SWWV?")
+        else:
+            returnVal = -1
+        return returnVal
+
+    def setBurstWaveParams(self, port="C1"):
+        return 0
+
+    def getBurstWaveParams(self, port="C1"):
+        if not self.dev is None:
+            returnVal = self.query(port+":BTWV?")
+        else:
+            returnVal = -1
+        return returnVal
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
