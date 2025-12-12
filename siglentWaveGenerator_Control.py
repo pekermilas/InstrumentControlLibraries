@@ -545,7 +545,7 @@ class sdg6022X:
             if not swpCarrWvTyp is None:
                 if (swpCarrWvTyp=="SINE" or swpCarrWvTyp=="SQUARE" or
                     swpCarrWvTyp=="RAMP" or swpCarrWvTyp=="ARB"):
-                        inputString = inputString + ",CARRY," + str(swpCarrWvTyp)
+                        inputString = inputString + ",CARRY,WVTP," + str(swpCarrWvTyp)
                 else:
                     print("Unknown sweeper carrier wave type")
                     missingPar+=1
@@ -602,7 +602,139 @@ class sdg6022X:
             returnVal = -1
         return returnVal
 
-    def setBurstWaveParams(self, port="C1"):
+    def setBurstWaveParams(self, port="C1", brstdState=None, brstPrd=None, 
+                           brstStartPhs=None, brstGate=None, brstTrigSrc=None,
+                           brstManTrig=None, brstTrigDly=None, brstTrigPlrty=None,
+                           brstTrigOutMod=None, brstTrigEdge=None, brstTrigCycTime=None,
+                           brstCarrWvTyp=None, brstCarrFrq=None, brstCarrPhse=None, 
+                           brstCarrAmpl=None, brstCarrOfst=None, brstCarrSymm=None, 
+                           brstCarrDuty=None, brstCarrRise=None, brstCarrFall=None,
+                           brstCarrDly=None, brstCarrStd=None, brstCarrMean=None):
+        missingPar = 0
+        inputString = port + ":BTWV "
+        if not self.dev is None:
+            if not brstdState is None:
+                inputString = inputString + ",STATE," + str(brstdState)
+            else:
+                print("Missing Parameter: burst state in ON/OFF")
+                missingPar+=1
+            if not brstPrd is None:
+                inputString = inputString + ",PRD," + str(brstPrd)
+            else:
+                print("Missing Parameter: burst period in seconds")
+                missingPar+=1
+            if not brstStartPhs is None:
+                inputString = inputString + ",STPS," + str(brstStartPhs)
+            else:
+                print("Missing Parameter: burst start phase in degrees")
+                missingPar+=1
+            if not brstGate is None:
+                inputString = inputString + ",GATE_NCYC," + str(brstGate)
+            else:
+                print("Missing Parameter: burst mode in GATE or NCYC")
+                missingPar+=1
+            if not brstTrigSrc is None:
+                inputString = inputString + ",TRSR," + str(brstTrigSrc)
+            else:
+                print("Missing Parameter: burst trigger source in EXT or INT or MAN")
+                missingPar+=1
+            if not brstTrigDly is None:
+                inputString = inputString + ",DLAY," + str(brstTrigDly)
+            else:
+                print("Missing Parameter: burst delay in seconds")
+                missingPar+=1
+            if not brstTrigPlrty is None:
+                inputString = inputString + ",PLRT," + str(brstTrigPlrty)
+            else:
+                print("Missing Parameter: burst gate polarity in NEG or POS")
+                missingPar+=1
+            if not brstTrigOutMod is None:
+                inputString = inputString + ",TRMD," + str(brstTrigOutMod)
+            else:
+                print("Missing Parameter: burst trigger out mode in RISE or FALL or OFF")
+                missingPar+=1
+            if not brstTrigEdge is None:
+                inputString = inputString + ",EDGE," + str(brstTrigEdge)
+            else:
+                print("Missing Parameter: burst trigger edge in RISE or FALL")
+                missingPar+=1
+            if not brstTrigCycTime is None:
+                inputString = inputString + ",TIME," + str(brstTrigCycTime)
+            else:
+                print("Missing Parameter: burst trigger edge in cycle number/integer")
+                missingPar+=1
+            if not brstCarrWvTyp is None:
+                if (brstCarrWvTyp=="SINE" or brstCarrWvTyp=="SQUARE" or 
+                    brstCarrWvTyp=="RAMP" or brstCarrWvTyp=="ARB" or 
+                    brstCarrWvTyp=="PULSE" or brstCarrWvTyp=="NOISE"):
+                    inputString = inputString + ",CARRY,WVTP" + str(brstCarrWvTyp)
+                else:
+                    print("Unknown sweeper carrier wave type")
+                    missingPar+=1
+                if not brstCarrFrq is None:
+                    inputString = inputString + ",FRQ," + str(brstCarrFrq)
+                else:
+                    print("Missing Parameter: burst carrier frequency in Hz")
+                    missingPar+=1
+                if not brstCarrPhse is None:
+                    inputString = inputString + ",PHSE," + str(brstCarrPhse)
+                else:
+                    print("Missing Parameter: burst carrier phase in degrees")
+                    missingPar+=1
+                if not brstCarrAmpl is None:
+                    inputString = inputString + ",AMP," + str(brstCarrAmpl)
+                else:
+                    print("Missing Parameter: burst carrier amplitude in V")
+                    missingPar+=1
+                if not brstCarrOfst is None:
+                    inputString = inputString + ",OFST," + str(brstCarrOfst)
+                else:
+                    print("Missing Parameter: burst carrier offset in V")
+                    missingPar+=1
+                if brstCarrWvTyp=="RAMP":
+                    if not brstCarrSymm is None:
+                        inputString = inputString + ",SYM," + str(brstCarrSymm)
+                    else:
+                        print("Missing Parameter: burst carrier symmetry in V")
+                        missingPar+=1
+                if brstCarrWvTyp=="PULSE":
+                    if not brstCarrRise is None:
+                        inputString = inputString + ",RISE," + str(brstCarrRise)
+                    else:
+                        print("Missing Parameter: burst carrier rise time in seconds")
+                        missingPar+=1
+                    if not brstCarrFall is None:
+                        inputString = inputString + ",FALL," + str(brstCarrFall)
+                    else:
+                        print("Missing Parameter: burst carrier fall time in seconds")
+                        missingPar+=1
+                    if not brstCarrDly is None:
+                        inputString = inputString + ",DLY," + str(brstCarrDly)
+                    else:
+                        print("Missing Parameter: burst carrier delay time in seconds")
+                        missingPar+=1
+                if brstCarrWvTyp=="NOISE":
+                    if not brstCarrStd is None:
+                        inputString = inputString + ",STDEV," + str(brstCarrStd)
+                    else:
+                        print("Missing Parameter: burst carrier stdev in V")
+                        missingPar+=1
+                    if not brstCarrMean is None:
+                        inputString = inputString + ",MEAN," + str(brstCarrMean)
+                    else:
+                        print("Missing Parameter: burst carrier mean in V")
+                        missingPar+=1
+            else:
+                print("Missing Parameter: burst carrier wave type")
+                missingPar+=1
+        else:
+            missingPar+=1
+        
+        if missingPar>0:
+            returnVal = -1
+        else:
+            returnVal = 1
+            self.write(inputString)
         return 0
 
     def getBurstWaveParams(self, port="C1"):
