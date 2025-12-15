@@ -10,6 +10,10 @@ Created on Fri Dec  5 08:33:16 2025
 # dev = sgd.sdg6022X()
 # dev.open()
 # dev.setBasicWaveParams(shape="SQUARE",freq=100, ampl=1, offst=0, duty=50, phse=0)
+# dev.getBasicWaveParams()
+# dev.setWaveModulationParams(modSrcType="INT",modSrcShape="SQUARE",modSrcFreq=100,modDepth=50, modState="ON")
+# dev.setWaveModulationParams(modType="AM",modSrcType="INT",modSrcShape="SQUARE",modSrcFreq=100,modDepth=50, modState="ON")
+# dev.getWaveModulationParams()
 # dev.setOutputState(output="ON")
 # dev.setOutputState(output="OFF")
 # dev.close()
@@ -285,7 +289,7 @@ class sdg6022X:
         return returnVal
     
     def setWaveModulationParams(self, port="C1", modType="AM", modState=None,
-                                modSrcType=None, modWvShape=None, modFreq=None,
+                                modSrcType=None, modSrcShape=None, modSrcFreq=None,
                                 modDepth=None, modDev=None, modKeyFreq=None,
                                 modHopFreq=None, modCarrShape=None, modCarrFreq=None,
                                 modCarrPhse=None, modCarrAmpl=None, modCarrOfst=None, 
@@ -318,12 +322,12 @@ class sdg6022X:
             if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
                 modType=="PM" or modType=="PWM"):
                 if modSrcType=="INT":
-                    if not modWvShape is None:
-                        if (modWvShape=="SINE" or modWvShape=="SQUARE" or
-                            modWvShape=="TRIANGLE" or modWvShape=="UPRAMP" or
-                            modWvShape=="DNRAMP" or modWvShape=="NOISE" or 
-                            modWvShape=="ARB"):
-                            inputString = inputString + ",MDSP," + str(modWvShape)
+                    if not modSrcShape is None:
+                        if (modSrcShape=="SINE" or modSrcShape=="SQUARE" or
+                            modSrcShape=="TRIANGLE" or modSrcShape=="UPRAMP" or
+                            modSrcShape=="DNRAMP" or modSrcShape=="NOISE" or 
+                            modSrcShape=="ARB"):
+                            inputString = inputString + ",MDSP," + str(modSrcShape)
                         else:
                             print("Unknown source shape")
                             missingPar+=1
@@ -336,8 +340,8 @@ class sdg6022X:
             if (modType=="AM" or modType=="DSBAM" or modType=="FM" or 
                 modType=="PM" or modType=="PWM", modType=="CARR"):
                 if modSrcType=="INT":
-                    if not modFreq is None:
-                        inputString = inputString + ",FRQ," + str(modFreq)
+                    if not modSrcFreq is None:
+                        inputString = inputString + ",FRQ," + str(modSrcFreq)
                     else:
                         print("Missing Parameter: mod source frequency in Hz")
                         missingPar+=1
