@@ -901,9 +901,11 @@ class sr400:
     
     def data_startNewScan(self, counter = 'A'):
         if counter == 'A' or counter == 'B' or counter == 'T':
-            returnVal = self.query('F'+str(counter)).rstrip()
+            self.write('F'+str(counter))
+            returnVal = 0
         else:
-            returnVal = self.query('FA').rstrip()
+            self.write('FA')
+            returnVal = 1
         
         return returnVal
     

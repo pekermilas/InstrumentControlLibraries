@@ -25,7 +25,7 @@ import time
 import binascii
 import os
 
-os.chdir("C:/Users/pekermilas/Documents/GitHub/InstrumentControlLibraries/")
+# os.chdir("C:/Users/pekermilas/Documents/GitHub/InstrumentControlLibraries/")
 
 class sdg6022X:
 
@@ -607,7 +607,7 @@ class sdg6022X:
         return returnVal
 
     def setBurstWaveParams(self, port="C1", brstdState=None, brstPrd=None, 
-                           brstStartPhs=None, brstGate=None, brstTrigSrc=None,
+                           brstStartPhs=None, brstMod=None, brstTrigSrc=None,
                            brstManTrig=None, brstTrigDly=None, brstTrigPlrty=None,
                            brstTrigOutMod=None, brstTrigEdge=None, brstTrigCycTime=None,
                            brstCarrWvTyp=None, brstCarrFrq=None, brstCarrPhse=None, 
@@ -618,7 +618,7 @@ class sdg6022X:
         inputString = port + ":BTWV "
         if not self.dev is None:
             if not brstdState is None:
-                inputString = inputString + ",STATE," + str(brstdState)
+                inputString = inputString + "STATE," + str(brstdState)
             else:
                 print("Missing Parameter: burst state in ON/OFF")
                 missingPar+=1
@@ -632,8 +632,8 @@ class sdg6022X:
             else:
                 print("Missing Parameter: burst start phase in degrees")
                 missingPar+=1
-            if not brstGate is None:
-                inputString = inputString + ",GATE_NCYC," + str(brstGate)
+            if not brstMod is None:
+                inputString = inputString + ",GATE_NCYC," + str(brstMod)
             else:
                 print("Missing Parameter: burst mode in GATE or NCYC")
                 missingPar+=1
@@ -671,7 +671,7 @@ class sdg6022X:
                 if (brstCarrWvTyp=="SINE" or brstCarrWvTyp=="SQUARE" or 
                     brstCarrWvTyp=="RAMP" or brstCarrWvTyp=="ARB" or 
                     brstCarrWvTyp=="PULSE" or brstCarrWvTyp=="NOISE"):
-                    inputString = inputString + ",CARRY,WVTP" + str(brstCarrWvTyp)
+                    inputString = inputString + ",CARRY,WVTP," + str(brstCarrWvTyp)
                 else:
                     print("Unknown sweeper carrier wave type")
                     missingPar+=1
@@ -736,9 +736,11 @@ class sdg6022X:
         
         if missingPar>0:
             returnVal = -1
+            self.write(inputString)
         else:
             returnVal = 1
             self.write(inputString)
+        # print(inputString)
         return 0
 
     def getBurstWaveParams(self, port="C1"):
