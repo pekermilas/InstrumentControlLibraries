@@ -108,23 +108,28 @@ class agi33220A:
         return returnVal
 
 # ----------------------- SECTION APPLY ------------------------------- # 
-    def systemID(self):
+    def setBasicWaveParams(self, shape="SQUARE", freq=None, 
+                           period=None, ampl=None, offst=None):
+        waveShapes = ['SINE', 'SQUARE', 'RAMP', 'PULSE', 'NOISE', 
+                      'DC', 'ARBS']
         if not self.dev is None:
-            returnVal = self.query('*IDN')
+            if shape in waveShapes:
+                
         else:
             returnVal = -1
         return returnVal
 
-    def operationComplete(self):
-        if not self.dev is None:
-            returnVal = self.query("*OPC?")
-        else:
-            returnVal = -1
-        return returnVal
 
-    def resetDevice(self):
-        if not self.dev is None:
-            returnVal = self.write('*RST')
-        else:
-            returnVal = -1
-        return returnVal
+
+
+
+
+
+
+
+
+
+
+
+
+
