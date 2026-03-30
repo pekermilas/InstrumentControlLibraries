@@ -32,7 +32,39 @@ daq.set('/dev32271/imps/0/freq', 501000)
 daq.set('/dev32271/imps/0/mode', 1)
 daq.set('/dev32271/imps/0/maxbandwidth', 10000)
 
-# Fifth paragraph in Cemil's notes
+# Data acquisition
+daq_module = daq.dataAcquisitionModule()
+daq_module.set('triggernode', '/dev32271/demods/0/sample.R')
+daq_module.set('preview', 1)
+daq_module.set('device', 'dev32271')
+daq_module.set('historylength', 100)
+daq_module.set('bandwidth', 0)
+daq_module.set('hysteresis', 0.01)
+daq_module.set('level', 0.1)
+daq_module.set('save/directory', 'C:\\Users\\pekermilas\\Downloads')
+daq_module.set('clearhistory', 1)
+daq_module.set('bandwidth', 0)
+daq_module.set('triggernode', '/dev32271/imps/0/sample.Param1')
+daq_module.set('clearhistory', 1)
+daq_module.set('findlevel', 1)
+daq_module.set('endless', 0)
+daq_module.subscribe('/dev32271/imps/0/sample.Param1.csv')
+daq_module.execute()
+
+timeout = 100
+start = time.time()
+while not daq_module.finished():
+    time.sleep(0.2)
+    progress = daq_module.progress()
+    print("Individual DAQ progress: {:.2%}.".format(progress[0]), end="\r")
+    if (time.time() - start) > timeout:
+        print("\nDAQ still not finished, forcing finish...")
+        daq_module.finish()
+print("")
+
+data = daq_module.read(True)
+daq_module.unsubscribe('*')
+
 
 
 
