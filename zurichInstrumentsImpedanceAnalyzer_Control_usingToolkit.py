@@ -8,6 +8,7 @@ import time
 import zhinst.core
 import zhinst.toolkit as zt
 import zhinst.ziPython as zi
+import numpy as np
 import matplotlib.pyplot as plt
 
 discovery = zi.ziDiscovery()
@@ -45,7 +46,28 @@ session.daq_server.set('/dev32271/imps/0/mode', 1)
 session.daq_server.set('/dev32271/imps/0/maxbandwidth', 10000)
 
 # Device definition and relatd commands
+# Check connected devices
 dev = session.devices
+
+# Coonect 
+device = session.connect_device('dev32271')
+
+device.demods[0].enable(True)
+device.imps[0].enable(True)
+
+device.demods[0].sample.subscribe()
+dataDemods = session.poll()
+device.demods[0].sample.unsubscribe()
+
+device.imps[0].sample.subscribe()
+dataImps = session.poll()
+device.imps[0].sample.unsubscribe()
+
+plt.plot(dataImps[device.imps[0].sample]['timestamp'],dataImps[device.imps[0].sample]['param0'])
+plt.plot(dataImps[device.imps[0].sample]['timestamp'],dataImps[device.imps[0].sample]['param1'])
+
+# daq.set('/dev32271/system/shutdown', 1)
+
 
 # #subscription and set up trigger for measurement
 # mfli.daq.signals_clear()
