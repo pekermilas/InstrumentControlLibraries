@@ -25,6 +25,18 @@ session = zt.session.Session(server_host=device_props['serveraddress'],
                              server_port=device_props['serverport'], 
                              allow_version_mismatch=True)
 
+# Device definition and settings!!! 
+device = session.connect_device('dev32271')
+
+# Below is their new convention!!!!
+# a = list(device.tu)
+# a[0][0]
+# a[0][1].keys()
+# a[0][1]['Options']
+
+# There is a[1] and more....
+
+
 # First paragraph in Cemil's notes 
 session.daq_server.set('/dev32271/tu/thresholds/0/input', 59)
 session.daq_server.set('/dev32271/tu/thresholds/0/activationtime', 0.006)
@@ -49,7 +61,7 @@ session.daq_server.set('/dev32271/imps/0/maxbandwidth', 10000)
 # Check connected devices
 dev = session.devices
 
-# Coonect 
+# Connect 
 device = session.connect_device('dev32271')
 
 device.demods[0].enable(True)
