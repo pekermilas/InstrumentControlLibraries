@@ -10,6 +10,7 @@ import zhinst.toolkit as zt
 import zhinst.ziPython as zi
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 discovery = zi.ziDiscovery()
 device_id = discovery.find('dev32271')
@@ -29,6 +30,17 @@ session = zt.session.Session(server_host=device_props['serveraddress'],
 device = session.connect_device('dev32271')
 
 # Below is their new convention!!!!
+devs = list(device)
+pars = [0] * len(devs)
+for i in range(len(devs)):
+    pars[i] = devs[i][1]['Node'].split('/')[1:]
+
+pars = pd.DataFrame(pars)
+tabs = list(set(pars.iloc[:,1]))
+
+a = [list(device.tu)[i][1]['Options'] for i in range(len(list(device.tu))) 
+ if str(list(device.tu)[i][0])=='/dev32271/tu/thresholds/0/input']
+
 # a = list(device.tu)
 # a[0][0]
 # a[0][1].keys()
