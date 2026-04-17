@@ -29,25 +29,7 @@ session = zt.session.Session(server_host=device_props['serveraddress'],
 # Device definition and settings!!! 
 device = session.connect_device('dev32271')
 
-# Below is their new convention!!!!
-devs = list(device)
-pars = [0] * len(devs)
-for i in range(len(devs)):
-    pars[i] = devs[i][1]['Node'].split('/')[1:]
-
-pars = pd.DataFrame(pars)
-tabs = list(set(pars.iloc[:,1]))
-
-a = [list(device.tu)[i][1]['Options'] for i in range(len(list(device.tu))) 
- if str(list(device.tu)[i][0])=='/dev32271/tu/thresholds/0/input']
-
-# a = list(device.tu)
-# a[0][0]
-# a[0][1].keys()
-# a[0][1]['Options']
-
-# There is a[1] and more....
-
+odmrc.antennaNo = input("Please enter Antenna No: ")
 
 # First paragraph in Cemil's notes 
 session.daq_server.set('/dev32271/tu/thresholds/0/input', 59)
@@ -73,8 +55,8 @@ session.daq_server.set('/dev32271/imps/0/maxbandwidth', 10000)
 # Check connected devices
 dev = session.devices
 
-# Connect 
-device = session.connect_device('dev32271')
+# # Connect 
+# device = session.connect_device('dev32271')
 
 device.demods[0].enable(True)
 device.imps[0].enable(True)
@@ -102,104 +84,23 @@ plt.show()
 # # creates a confusion about where the old data finishes and where the
 # # new data starts!!! 
 
-# sample_nodes = [
-#     device.demods[0].sample.auxin0,
-#     device.imps[0].sample.param0,
-#     device.imps[0].sample.param1,
-#     device.imps[0].sample.z
-# ]
+# # Below is their new convention!!!!
+# devs = list(device)
+# pars = [0] * len(devs)
+# for i in range(len(devs)):
+#     pars[i] = devs[i][1]['Node'].split('/')[1:]
 
-# TOTAL_DURATION = 5 # [s]
-# SAMPLING_RATE = 30000 # Number of points/second
-# BURST_DURATION = 0.2 # Time in seconds for each data burst/segment.
+# pars = pd.DataFrame(pars)
+# tabs = list(set(pars.iloc[:,1]))
 
-# num_cols = int(np.ceil(SAMPLING_RATE * BURST_DURATION))
-# num_bursts = int(np.ceil(TOTAL_DURATION / BURST_DURATION))
+# a = [list(device.tu)[i][1]['Options'] for i in range(len(list(device.tu))) 
+#  if str(list(device.tu)[i][0])=='/dev32271/tu/thresholds/0/input']
 
-# daq_module = session.modules.daq
-# daq_module.device(device)
-# daq_module.type(0) # continuous acquisition
-# daq_module.grid.mode(2)
-# daq_module.count(num_bursts)
-# daq_module.duration(BURST_DURATION)
-# daq_module.grid.cols(num_cols)
+# # a = list(device.tu)
+# # a[0][0]
+# # a[0][1].keys()
+# # a[0][1]['Options']
 
-# daq_module.save.fileformat(1)
-# daq_module.save.filename('zi_toolkit_acq_example')
-# daq_module.save.saveonread(1)
-
-# for node in sample_nodes:
-#     daq_module.subscribe(node)
-    
-# clockbase = device.clockbase()
+# # There is a[1] and more....
 
 
-# def read_and_plot_data(daq_module, results, ts0):
-#     daq_data = daq_module.read(raw=False, clk_rate=clockbase)
-#     progress = daq_module.raw_module.progress()[0]
-#     for node in sample_nodes:
-#         # Check if node data available
-#         if node in daq_data.keys():
-#             for sig_burst in daq_data[node]:
-#                 results[node].append(sig_burst)
-#                 if np.any(np.isnan(ts0)):
-#                   ts0 = sig_burst.header['createdtimestamp'][0] / clockbase
-#                 # Convert from device ticks to time in seconds.
-#                 t0_burst = sig_burst.header['createdtimestamp'][0] / clockbase
-#                 t = (sig_burst.time + t0_burst) - ts0
-#                 value = sig_burst.value[0, :]
-#                 # Plot the data
-#                 ax1.plot(t, value)
-#                 ax1.set_title(f"Progress of data acquisition: {100 * progress:.2f}%.")
-#                 fig.canvas.draw()
-#                 plt.pause(0.001)
-#     return results, ts0
-
-
-# ts0 = np.nan
-# timeout = 1.5 * TOTAL_DURATION
-# start_time = time.time()
-# results = {x: [] for x in sample_nodes}
-
-# fig = plt.figure()
-# ax1 = fig.add_subplot(111)
-# ax1.set_xlabel("Time ($s$)")
-# ax1.set_ylabel("Subscribed signals")
-# ax1.set_xlim([0, TOTAL_DURATION])
-# ax1.grid()
-
-# # Start recording data
-# daq_module.execute()
-
-# while time.time() - start_time < timeout:
-#     results, ts0 = read_and_plot_data(daq_module, results, ts0)
-#     if daq_module.raw_module.finished():
-#         # Once finished, call once more to get the potential remaining data.
-#         results, ts0 = read_and_plot_data(daq_module, results, ts0)
-#         break
-
-#     time.sleep(BURST_DURATION)
-
-# # daq.set('/dev32271/system/shutdown', 1)
-
-
-# # #subscription and set up trigger for measurement
-# # mfli.daq.signals_clear()
-# # #add the 2nd parameter of impedance, 
-# # #default Cp, as the only signal of interest
-# # imp_param1 = mfli.daq.signals_add('imp0','param1') 
-# # mfli.daq.type('edge') #set edge trigger mode, default, rise 
-# # #change to your device number
-# # mfli.daq.triggernode('/DEV4562/imps/0/sample.param1') 
-# # mfli.daq.findlevel(1) #automatic search for level
-# # #500 is arbitraty chosen. 
-# # #The duration by default equals to 500Sa/13kSa/s=38ms
-# # mfli.daq.grid_cols(500) 
-# # mfli.daq.measure() #start the daq module
-
-# # #save data for plotting
-# # result = mfli.daq.results[imp_param1]
-# # plt.plot(result.time, result.value[0])
-# # plt.xlabel('Time (s)')
-# # plt.ylabel('Capacitance (F)')
-# # plt.title("Transient capacitance")
