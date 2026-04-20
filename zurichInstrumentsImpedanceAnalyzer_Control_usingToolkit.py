@@ -29,7 +29,7 @@ session = zt.session.Session(server_host=device_props['serveraddress'],
 # Device definition and settings!!! 
 device = session.connect_device('dev32271')
 
-odmrc.antennaNo = input("Please enter Antenna No: ")
+# odmrc.antennaNo = input("Please enter Antenna No: ")
 
 # First paragraph in Cemil's notes 
 session.daq_server.set('/dev32271/tu/thresholds/0/input', 59)
